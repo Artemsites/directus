@@ -7,4 +7,5 @@
 <todo>
 * Установить систему локально в текущую папку ./
 * Пока желательно SQLLite, позже возможно надо будет MySQL
++ directus-extension-board-layout/kanboard
 </todo>
