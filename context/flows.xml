@@ -1,0 +1,104 @@
+<system name="Directus12-Kanban-Recurring" version="1.2" lang="ru">
+  <goal>Done + Recurring → клон Tasks (to_do, сдвиг дат) + запись в Inbox. Логи только зелёные.</goal>
+
+  <status>
+    <ok>Клон задачи, Inbox/колокольчик (notification id=12, task id=58)</ok>
+    <not>Toast Studio из Flow. Так и должно быть. Не чинить скриптами.</not>
+  </status>
+
+  <how_to_write_flows>
+    <ban>Нода Condition (Joi → красный Validation failed).</ban>
+    <ban>throw / alert / window / Filter Blocking как «попап».</ban>
+    <ok>Условие не выполнено → return []. Create Data глотает [] = 0 записей, лог зелёный.</ok>
+    <ok>Перед скриптом всегда Read Data по $trigger.keys. $trigger.payload — не карточка, только изменённые поля.</ok>
+    <ok>User: $accountability.user, иначе 2487b299-3d6b-4b41-8adf-7f79e67eb3eb.</ok>
+    <ok>Create Data возвращает [id], не объект. Title брать из скрипта сдвига дат (обход Object.values, Status===to_do).</ok>
+    <ok>Recurring: includes(day|week|month|year), не ===.</ok>
+    <ok>Emit Events: false на Tasks, true на directus_notifications.</ok>
+    <ok>Писать в directus_notifications через Create Data, не нодой Send Notification.</ok>
+    <ok>Ключи полей как в схеме: Status Title Recurring Start End. Коллекцию сверить в Data Model (сейчас Tasks).</ok>
+    <note>Дедуп клонов и «умный» сдвиг 31+month не делаем. Повторный done снова клонирует.</note>
+  </how_to_write_flows>
+
+  <flow>
+    <step n="1">Event Hook Action / items.update / Tasks</step>
+    <step n="2">Read Data Tasks, IDs={{$trigger.keys}}</step>
+    <step n="3">Run Script — даты</step>
+    <step n="4">Create Data Tasks {{$last}} emit=false</step>
+    <step n="5">Run Script — notification</step>
+    <step n="6">Create Data directus_notifications {{$last}} emit=true (имя коллекции ввести вручную + Enter)</step>
+  </flow>
+
+  <script id="dates"><![CDATA[
+module.exports = async function (data) {
+    const readResult = data.$last;
+    const items = Array.isArray(readResult) ? readResult : readResult ? [readResult] : [];
+    const task = items[0];
+    if (!task || task.Status !== "done" || !task.Recurring) return [];
+
+    const shiftDate = (dateString, interval) => {
+        if (!dateString) return null;
+        const d = new Date(dateString);
+        if (Number.isNaN(d.getTime())) return null;
+        const int = String(interval).toLowerCase();
+        if (int.includes("day")) d.setDate(d.getDate() + 1);
+        else if (int.includes("week")) d.setDate(d.getDate() + 7);
+        else if (int.includes("month")) d.setMonth(d.getMonth() + 1);
+        else if (int.includes("year")) d.setFullYear(d.getFullYear() + 1);
+        else return null;
+        return d.toISOString();
+    };
+
+    const nextStart = shiftDate(task.Start, task.Recurring);
+    const nextEnd = shiftDate(task.End, task.Recurring);
+    if (!nextStart && !nextEnd) return [];
+
+    return [{
+        Title: task.Title || "Повторяющаяся задача",
+        Status: "to_do",
+        Recurring: task.Recurring,
+        Start: nextStart,
+        End: nextEnd
+    }];
+};
+  ]]></script>
+
+  <script id="notification"><![CDATA[
+module.exports = async function (data) {
+    const OWNER_UUID = "2487b299-3d6b-4b41-8adf-7f79e67eb3eb";
+    const created = data.$last;
+    const createdIds = Array.isArray(created) ? created : created ? [created] : [];
+    if (createdIds.length === 0) return [];
+    const newTaskId = typeof createdIds[0] === "object" ? createdIds[0].id : createdIds[0];
+    const userId = data.$accountability?.user || data.$trigger?.accountability?.user || OWNER_UUID;
+    if (!userId) return [];
+
+    let taskTitle = "Повторяющаяся задача";
+    let taskStart = null;
+    for (const nodeResult of Object.values(data)) {
+        if (!Array.isArray(nodeResult) || !nodeResult[0] || typeof nodeResult[0] !== "object") continue;
+        if (nodeResult[0].Title && nodeResult[0].Status === "to_do") {
+            taskTitle = nodeResult[0].Title;
+            taskStart = nodeResult[0].Start;
+            break;
+        }
+    }
+    const startDate = taskStart ? new Date(taskStart).toLocaleDateString("ru-RU") : "неизвестную дату";
+
+    return [{
+        recipient: userId,
+        sender: null,
+        status: "inbox",
+        subject: "🔁 Повторяющаяся задача",
+        message: `Создана карточка «${taskTitle}». Запланирована на ${startDate}`,
+        collection: "Tasks",
+        item: String(newTaskId)
+    }];
+};
+  ]]></script>
+
+  <toast>
+    Inbox ≠ Toast. Toast только из браузера (hidden module + poll /notifications).
+    Flow не трогать. Extension не собирать, пока не попросили.
+  </toast>
+</system>
