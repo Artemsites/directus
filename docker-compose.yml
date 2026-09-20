@@ -1,0 +1,20 @@
+services:
+    directus:
+        image: directus/directus:12.0.2 # Жесткая фиксация версии (12.0.2) вместо latest — это гарантирует, что база данных не сломается от случайного минорного обновления при пересоздании контейнера.
+        ports:
+            - 8055:8055
+        volumes:
+            - ./database:/directus/database
+            - ./uploads:/directus/uploads
+            - ./extensions:/directus/extensions
+        environment:
+            KEY: "76tr872e983yrb289r3tcfbgr2938yrtc287r9237tvfd" # Обязательное поле
+            SECRET: "$%eRD*frb67(^tb0y98yh9-hn&)Hb56vc"
+            DB_CLIENT: "sqlite3"
+            DB_FILENAME: "/directus/database/data.db"
+            WEBSOCKETS_ENABLED: "true"
+            PUBLIC_URL: "http://localhost:8055/"
+            LICENSE_KEY: ""
+            # Опционально: создаст админа автоматически при инициализации базы
+            ADMIN_EMAIL: "info@artemsites.ru"
+            ADMIN_PASSWORD: "cEd56*6gn76r45dC%85^rfcx&^5cvv4"
