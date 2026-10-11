@@ -1,4 +1,3 @@
-import { ref } from 'vue';
 import { defineLayout } from '@directus/extensions-sdk';
 import LayoutComponent from './layout.vue';
 
@@ -13,8 +12,6 @@ export default defineLayout({
 		actions: () => null,
 	},
 	setup() {
-		const name = ref('Custom Layout');
-
-		return { name };
+		return {};
 	},
 });
