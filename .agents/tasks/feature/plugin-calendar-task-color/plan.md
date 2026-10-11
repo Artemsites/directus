@@ -113,8 +113,8 @@ reviewer=owner auto_start=1
     - grep -q "Color" database/schema.yaml - success_all
   - git_hash: e51abfb
 
-- [ ] Шаг 9: Subagent security review of branch changes
-  - status: process, starts: 1
+- [x] Шаг 9: Subagent security review of branch changes
+  - status: review, starts: 1
   - model: mid, effort: medium
   - agent: security
   - diag: Security audit of extension and schema → inspect extensions/calendar-colored and API for vulnerabilities
@@ -123,10 +123,10 @@ reviewer=owner auto_start=1
     - 9.2 Compile report in .agents/tasks/feature/plugin-calendar-task-color/reviews/security-1.md
   - tests:
     - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/security-1.md
-  - git_commit: pending
+  - git_hash: 403cc6f
 
-- [ ] Шаг 10: Subagent clean code and architecture review across whole branch via ponytail-reviewer
-  - status: todo, starts: 0
+- [x] Шаг 10: Subagent clean code and architecture review across whole branch via ponytail-reviewer
+  - status: review, starts: 1
   - model: mid, effort: medium
   - agent: ponytail-reviewer
   - diag: Clean code and architecture audit across branch → evaluate against ponytail guidelines (KISS, YAGNI, DRY, SSoT)
@@ -134,7 +134,7 @@ reviewer=owner auto_start=1
     - 10.1 Audit full branch diff against ponytail criteria (architecture, minimalism, cleanliness)
     - 10.2 Compile report in .agents/tasks/feature/plugin-calendar-task-color/reviews/ponytail.md
   - tests:
-    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/ponytail.md
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/ponytail.md - success_all
   - git_commit: pending
 
 - [ ] Шаг 11: Resolve findings and follow-up subagent security review
