@@ -173,15 +173,15 @@ reviewer=owner auto_start=1
     - grep -q "highlight_color" /Users/artem/git_craft/_directus/database/schema.yaml - success_all
   - git_commit: pending
 
-- [ ] Шаг 14: Support highlight_color in layout extension and rebuild
-  - status: todo, starts: 0
+- [x] Шаг 14: Support highlight_color in layout extension and rebuild
+  - status: done, starts: 1
   - model: lite, effort: low
   - diag: Extension layout needs highlight_color support → update layout.vue and recompile bundle
   - more:
     - 14.1 Map item.highlight_color with fallback to item.Color in layout.vue
     - 14.2 Build bundle via directus-extension build
   - tests:
-    - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build
+    - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build - success_all
   - git_commit: pending
 
 - [ ] Шаг 15: Create Directus core patch and apply to container calendar layout

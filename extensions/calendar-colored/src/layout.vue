@@ -93,6 +93,7 @@ interface TaskItem {
 	name?: string;
 	Start?: string | number | null;
 	End?: string | number | null;
+	highlight_color?: string | null;
 	Color?: string | null;
 	color?: string | null;
 	Status?: string | null;
@@ -159,7 +160,7 @@ export default defineComponent({
 				const response = await api.get(`/items/${encodeURIComponent(props.collection)}`, {
 					params: {
 						limit: 500,
-						fields: ['id', 'Title', 'title', 'name', 'Start', 'start', 'End', 'end', 'Color', 'color', 'Status', 'status'],
+						fields: ['id', 'Title', 'title', 'name', 'Start', 'start', 'End', 'end', 'highlight_color', 'Color', 'color', 'Status', 'status'],
 					},
 				});
 				items.value = response.data?.data || [];
@@ -341,7 +342,7 @@ export default defineComponent({
 
 		// Event card pill styling with dynamic background color and computed text contrast
 		const getEventStyle = (item: TaskItem) => {
-			const bgColor = item.Color || item.color || defaultEventColor;
+			const bgColor = item.highlight_color || item.Color || item.color || defaultEventColor;
 			const textColor = getContrastTextColor(bgColor);
 			return {
 				backgroundColor: bgColor,
