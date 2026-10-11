@@ -90,3 +90,41 @@
   - `docker compose logs directus --tail 20 | grep -i "calendar-colored"` — `success_all`
   - `grep -q "Color" database/schema.yaml` — `success_all`
 - **Commit:** `e51abfb`
+
+## Step 9: Subagent Security Review (Round 1)
+- **What was done:**
+  - Audited extension source, API queries, and schema for XSS, DoS, injections, and data exposure.
+  - Generated report in `reviews/security-1.md`.
+- **Tests:**
+  - `test -f reviews/security-1.md` — `success_all`
+- **Commit:** `403cc6f`
+
+## Step 10: Subagent Clean Code & Architecture Review (Ponytail)
+- **What was done:**
+  - Performed comprehensive code minimalism and scalability audit via ponytail subagent.
+  - Generated report in `reviews/ponytail.md` identifying numeric epoch parsing, full page reload SPA breaks, and query overfetching.
+- **Tests:**
+  - `test -f reviews/ponytail.md` — `success_all`
+- **Commit:** `f579db5`
+
+## Step 11: Remediation and Follow-Up Security Review (Round 2)
+- **What was done:**
+  - Restricted API field projection to `['id', 'Title', 'title', 'name', 'Start', 'start', 'End', 'end', 'Color', 'color', 'Status', 'status']`.
+  - Replaced full-page reload `window.location.href` with client-side Vue Router `useRouter().push` and safe fallback.
+  - Added support for numeric epoch timestamps and date-only YYYY-MM-DD parsing without UTC day-shift.
+  - Supported 8-digit hex colors (`#RRGGBBAA`) and moved color sets outside render loop.
+  - Executed follow-up security audit: PASSED (`reviews/security-2.md`).
+- **Tests:**
+  - `test -f reviews/security-2.md` — `success_all`
+  - `npm --prefix extensions/calendar-colored run build` — `success_all`
+- **Commit:** `94b80f6`
+
+## Step 12: Upstream Directus Contribution Materials
+- **What was done:**
+  - Generated `create_issue.md` proposing the feature to Directus maintainers.
+  - Generated `create_pr.md` with complete PR description, test plan, and usage instructions.
+- **Tests:**
+  - `test -f create_issue.md` — `success_all`
+  - `test -f create_pr.md` — `success_all`
+- **Commit:** `3b4c937`
+
