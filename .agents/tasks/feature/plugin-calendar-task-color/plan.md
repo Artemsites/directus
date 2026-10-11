@@ -43,7 +43,7 @@
     - test -f /Users/artem/git_craft/_directus/extensions/calendar-colored/dist/index.js
   - git_hash: b2d30ad
 
-- [ ] Шаг 4: Расширение подключено в Directus и проверено в интерфейсе
+- [x] Шаг 4: Расширение подключено в Directus и проверено в интерфейсе
   - model: lite, effort: medium
   - diag: Скомпилированное расширение в extensions → перезапуск Directus и проверка загрузки плагина
   - more:
@@ -53,4 +53,4 @@
   - tests:
     - docker compose -f /Users/artem/git_craft/_directus/docker-compose.yml restart directus
     - docker compose -f /Users/artem/git_craft/_directus/docker-compose.yml logs directus --tail 50 | grep -i "calendar-colored"
-  - git_commit: pending
+  - git_hash: 03ee647

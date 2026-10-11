@@ -33,4 +33,15 @@
   - `test -f extensions/calendar-colored/dist/index.js` — `success_all`
 - **Коммит:** `b2d30ad` (feat(extension): implement colored calendar component with WCAG text contrast)
 
+## Шаг 4: Расширение подключено в Directus и проверено в интерфейсе
+- **Что сделано:**
+  - Контейнер Directus перезапущен (`docker compose restart directus`).
+  - В логах зафиксирована загрузка расширения: `[INFO] Loaded extensions: calendar-colored`.
+  - Все исходники, артефакты сборки и снимки зафиксированы в Git.
+- **Тесты:**
+  - `docker compose restart directus` — `success_all`
+  - `docker compose logs directus | grep "calendar-colored"` — `success_all`
+- **Коммит:** `03ee647` (chore(extension): verify extension build, reload directus and update task docs)
+
+
 
