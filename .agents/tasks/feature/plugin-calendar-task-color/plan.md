@@ -207,3 +207,31 @@ reviewer=owner auto_start=1
     - grep -q "highlight_color" /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_pr.md - success_all
   - git_commit: pending
 
+- [x] Шаг 17: Subagent security and ponytail reviews
+  - status: done, starts: 1
+  - model: mid, effort: medium
+  - agent: security
+  - diag: Audit branch changes → execute security and ponytail reviews
+  - more:
+    - 17.1 Subagent security review in reviews/security-3.md
+    - 17.2 Subagent clean code and architecture review in reviews/ponytail-2.md
+    - 17.3 Delete obsolete PR.md and fix patch hunk header line count
+  - tests:
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/security-3.md - success_all
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/ponytail-2.md - success_all
+  - git_commit: pending
+
+- [x] Шаг 18: Verification security review and README documentation
+  - status: done, starts: 1
+  - model: mid, effort: low
+  - agent: security
+  - diag: Verification audit and documentation → run follow-up security review and create README.md
+  - more:
+    - 18.1 Re-run subagent security review in reviews/security-4.md
+    - 18.2 Create patches/README.md and module README.md
+  - tests:
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/security-4.md - success_all
+    - test -f /Users/artem/git_craft/_directus/patches/README.md - success_all
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/README.md - success_all
+  - git_commit: pending
+

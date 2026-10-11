@@ -128,3 +128,40 @@
   - `test -f create_pr.md` — `success_all`
 - **Commit:** `3b4c937`
 
+## Step 13: Added highlight_color Field to Tasks Schema
+- **What was done:**
+  - Added `highlight_color` string field (`varchar(255)`) with `select-color` interface and `color` display to `Tasks` collection.
+  - Exported updated schema snapshot to `database/schema.yaml`.
+- **Tests:**
+  - `grep -q "highlight_color" database/schema.yaml` — `success_all`
+- **Commit:** `04724ae`
+
+## Step 14: Core Directus Calendar Patch Generation and Application
+- **What was done:**
+  - Created minimal Directus core patch `patches/directus-calendar-highlight-color.patch` for `app/src/layouts/calendar/index.ts`.
+  - Removed obsolete standalone extension `extensions/calendar-colored` in favor of core patch.
+  - Applied live patch to container calendar layout assets.
+- **Tests:**
+  - `test -f patches/directus-calendar-highlight-color.patch` — `success_all`
+- **Commit:** `043f8e5`, `63569c6`
+
+## Step 15: Security & Architecture Reviews by Subagents (Rounds 3 & Ponytail)
+- **What was done:**
+  - Ran Round 3 subagent security audit (`reviews/security-3.md`): Verdict PASS (0 critical/high/medium).
+  - Ran clean code and architecture review via `ponytail-reviewer` (`reviews/ponytail-2.md`): identified patch hunk count mismatch, whitespace trimming recommendation, and obsolete `PR.md`.
+  - Deleted obsolete `PR.md` (-67 lines of dead docs).
+  - Updated patch with exact line counts, string trimming, and `.some()` check.
+- **Tests:**
+  - `test -f reviews/security-3.md` — `success_all`
+  - `test -f reviews/ponytail-2.md` — `success_all`
+
+## Step 16: Verification Security Review and Component Documentation
+- **What was done:**
+  - Re-ran subagent security review (`reviews/security-4.md`): Verdict PASS. Confirmed zero vulnerabilities, zero injection vectors, and verified clean patch syntax.
+  - Created `patches/README.md` and module `README.md` with complete usage and installation instructions.
+  - Aligned `create_issue.md` and `create_pr.md` with the finalized core patch.
+- **Tests:**
+  - `test -f patches/README.md` — `success_all`
+  - `test -f .agents/tasks/feature/plugin-calendar-task-color/README.md` — `success_all`
+  - `test -f reviews/security-4.md` — `success_all`
+

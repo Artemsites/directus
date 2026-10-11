@@ -36,3 +36,34 @@
 ### Ponytail Verdict:
 - `Verdict: fix 1, 2, 3, 4, 5 first.`
 - `Lean: -40 lines possible.`
+
+---
+
+## 3. Security Review Round 3 (Subagent `eb04d023-385b-49e2-bbf6-af423f9a0ba1`)
+
+### Verdict: PASS
+- 0 Critical, 0 High, 0 Medium issues.
+- CSS/JS injection & XSS: Safe. FullCalendar binds `color` via CSSOM properties safely.
+- RBAC: Validated that `fieldsInCollection` respects Directus permissions.
+- Operational note: Hunk header line-count corrected in `patches/directus-calendar-highlight-color.patch`.
+
+---
+
+## 4. Ponytail Architecture & Clean Code Review Round 2 (Subagent `31392bf0-4442-4692-8cf0-3df92390c780`)
+
+### Summary & Actions:
+- **Cleaned patch**: removed dead `types.ts` diff, added string trimming for whitespace safety, used `.some()` check.
+- **SSoT alignment**: synchronized patch, container runtime, `create_pr.md`, and `create_issue.md`.
+- **Removed dead documentation**: deleted obsolete `PR.md` (-67 lines).
+- **Added documentation**: created `patches/README.md` and module `README.md`.
+- **Verdict**: PASS after resolutions.
+
+---
+
+## 5. Security Verification Round 4 (Subagent `c25d8b6a-1f75-48fa-94a8-5cf2630d8a1c`)
+
+### Verdict: PASS
+- Zero security vulnerabilities or regressions.
+- Verified patch syntax applies cleanly with `0` rejects via both `git apply --check` and `patch --batch`.
+- Whitespace input safely trimmed to prevent invalid inline styles.
+- Obsolete files cleanly removed.

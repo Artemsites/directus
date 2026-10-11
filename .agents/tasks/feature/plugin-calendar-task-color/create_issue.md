@@ -13,12 +13,13 @@ While Directus provides flexible schema fields and interface displays, the built
 Enhance the built-in Directus **Calendar Layout** (`app/src/layouts/calendar`) to support custom item coloring:
 
 1. **Native `highlight_color` Parameter Support**:
-   - Inspects collection records for a `highlight_color` field (or fallback `Color` / `color` attribute) containing a hex string (e.g. `#10B981`, `#EF4444`, `#3B82F6`) or standard CSS color.
+   - Inspects collection records for a `highlight_color` field containing a hex string (e.g. `#10B981`, `#EF4444`, `#3B82F6`) or standard CSS color.
    - Passes `color: highlightColor` directly to FullCalendar event objects (`FullCalendar.EventInput`).
 2. **Automatic Field Projection**:
-   - Automatically appends `highlight_color` to queried fields in `calendarFilter` / `fields` computation whenever present in the collection schema.
+   - Automatically appends `highlight_color` to queried fields in `fields` computation whenever present in the collection schema.
 3. **Zero Breaking Changes**:
    - Collections without `highlight_color` continue to render with default theme styling without any disruption.
+   - Trims and validates color strings so whitespace does not create invalid CSS styles.
 
 ---
 
@@ -34,5 +35,5 @@ Enhance the built-in Directus **Calendar Layout** (`app/src/layouts/calendar`) t
 
 A clean git patch has been prepared against `directus/directus`:
 - File: `patches/directus-calendar-highlight-color.patch`
-- Touches only `app/src/layouts/calendar/index.ts` and `app/src/layouts/calendar/types.ts`.
+- Touches only `app/src/layouts/calendar/index.ts`.
 - Verified live on Directus 12.x.

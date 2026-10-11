@@ -2,19 +2,21 @@
 
 ## Description
 
-This PR enhances the built-in **Calendar** layout (`app/src/layouts/calendar`) to natively color event pills using a record's `highlight_color` (with fallback to `Color` or `color`) attribute.
+This pull request enhances Directus built-in **Calendar** layout (`app/src/layouts/calendar`) to natively color event pills using a record's `highlight_color` attribute.
 
 ---
 
 ## Key Changes
 
 1. **FullCalendar Event Color Integration** (`app/src/layouts/calendar/index.ts`):
-   - In `createEvent`, inspects the item for `highlight_color || Color || color`.
-   - Passes `color: highlightColor` directly into FullCalendar's event object.
+   - In `createEvent`, inspects the item for `highlight_color`.
+   - Safely trims string values to prevent whitespace-only invalid CSS values.
+   - Passes `color: highlightColor` directly into FullCalendar's event object (`color` attribute).
 2. **Dynamic Field Inclusion**:
-   - In `fields` computation, automatically requests `highlight_color`, `Color`, and `color` whenever present in the collection schema so that color attributes are always populated without requiring manual template configuration.
-3. **Types Update** (`app/src/layouts/calendar/types.ts`):
-   - Exposes optional `colorField` in `LayoutOptions`.
+   - In `fields` computation, automatically requests `highlight_color` whenever present in the collection schema so that color values are populated without requiring manual template configuration.
+3. **Zero Regressions / Breaking Changes**:
+   - Collections without `highlight_color` continue to render using standard theme styling.
+   - Restricted users who lack permission for `highlight_color` have the field excluded from queries, avoiding 403 Forbidden errors.
 
 ---
 
@@ -24,27 +26,28 @@ A companion git patch is provided in:
 `patches/directus-calendar-highlight-color.patch`
 
 ```diff
+diff --git a/app/src/layouts/calendar/index.ts b/app/src/layouts/calendar/index.ts
 --- a/app/src/layouts/calendar/index.ts
 +++ b/app/src/layouts/calendar/index.ts
-@@ -82,6 +82,12 @@ export default defineLayout<LayoutOptions>({
+@@ -82,6 +82,11 @@ export default defineLayout<LayoutOptions>({
  			if (endDateField.value) {
  				fields.push(endDateField.value);
  			}
 +
-+			// Include highlight_color or Color if present on collection for task card coloring
-+			fieldsInCollection.value.forEach((f: Field) => {
-+				if (['highlight_color', 'Color', 'color'].includes(f.field)) {
-+					fields.push(f.field);
-+				}
-+			});
++			// Include highlight_color if present on collection for task card coloring
++			if (fieldsInCollection.value?.some((f: Field) => f.field === 'highlight_color')) {
++				fields.push('highlight_color');
++			}
  
  			return [...fields, ...adjustFieldsForDisplays(fields, collection.value)];
  		});
-@@ -107,11 +113,13 @@ export default defineLayout<LayoutOptions>({
+@@ -107,11 +112,15 @@ export default defineLayout<LayoutOptions>({
  
  			const id = item[primaryKeyField.value.field];
  			const eventId = isVersioned.value ? item.$meta?.version_id : id;
-+			const highlightColor = item.highlight_color || item.Color || item.color;
++			const highlightColor = typeof item.highlight_color === 'string' && item.highlight_color.trim().length > 0
++				? item.highlight_color.trim()
++				: undefined;
  
  			return {
  				id: eventId,
@@ -52,7 +55,7 @@ A companion git patch is provided in:
  				start: item[startDateField.value],
  				end,
  				allDay,
-+				color: highlightColor ? String(highlightColor) : undefined,
++				color: highlightColor,
  				className: selection.value.includes(eventId) ? 'selected' : undefined,
  			};
  		}

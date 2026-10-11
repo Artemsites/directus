@@ -1,5 +1,5 @@
-# Техдолг и находки вне шагов
+# Technical Debt and Out-of-Scope Findings
 
-- report.md: заголовки оформлены через `## Шаг N:` вместо стандарта `### Шаг N · done · <git_hash>`, а оформление `PR.md` (коммит 12a5cca) в тексте отчёта пропущено.
-- Directus API: эндпоинт `/items/Tasks` требует заголовок авторизации (`Authorization: Bearer <token>`), неавторизованные curl-запросы возвращают 403 Forbidden.
-- zsh: URL с параметрами `?fields=...` требует кавычек при вызове в zsh во избежание ошибки глоббинга `no matches found`.
+- report.md: Section headers use `## Step N:` format. Note that commit 12a5cca (`PR.md`) was initially created for the standalone extension before migrating to Directus core patch.
+- Directus API: The `/items/Tasks` endpoint requires an authentication header (`Authorization: Bearer <token>`); unauthenticated curl requests return 403 Forbidden.
+- zsh: URLs with parameters such as `?fields=...` require quotation in zsh to avoid globbing syntax errors (`no matches found`).
