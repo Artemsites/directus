@@ -11,12 +11,15 @@ environment:
 
 docker-compose up -d
 
-## Рекомендация по версионированию БД:
+## Снимки схемы и SQLite-бэкап (Data Layer Protection)
 
-Бинарный data.db в Git сохраняет данные, но в коммитах не даёт диффа изменений (не видно, какое поле или
-коллекция добавились).
-В Directus для этого есть штатный механизм снимков:
+• Перед изменением структуры:
+  # 1. Текстовый снимок схемы в Git (для диффа и отката)
+  docker compose exec directus npx directus schema snapshot -y /directus/database/schema.yaml
+  # 2. Мгновенная копия бинарника SQLite
+  cp database/data.db database/data.db.bak
 
-docker compose exec directus npx directus schema snapshot -y /directus/database/schema.yaml
-
-Он создаёт человекочитаемый YAML с описанием всех коллекций, полей и связей для понятной истории в Git.
+• Как откатить, если агент наломал дров:
+  • Структуру: 
+    docker compose exec directus npx directus schema apply -y /directus/database/schema.yaml или git restore.
+  • Данные целиком: восстановить data.db из .bak.
