@@ -3,6 +3,7 @@
 * Language requirement: English only for all files in this branch, including owner markdown files.
 **Implement a Directus path that displays colored task cards in Calendar (layout)**
 * To do this, make an additional parameter `highlight_color` to make the functionality work.
+* `highlight_color` should be suggested for creation when creating db item, but not as a required parameter.
 * The new `highlight_color` field add to the `Tasks` collection schema.
 
 # Do After Task Realize
