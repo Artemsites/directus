@@ -137,8 +137,8 @@ reviewer=owner auto_start=1
     - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/ponytail.md - success_all
   - git_commit: pending
 
-- [ ] Шаг 11: Resolve findings and follow-up subagent security review
-  - status: todo, starts: 0
+- [x] Шаг 11: Resolve findings and follow-up subagent security review
+  - status: done, starts: 1
   - model: mid, effort: medium
   - agent: security
   - diag: Review findings → fix issues and perform verification security check
@@ -146,8 +146,8 @@ reviewer=owner auto_start=1
     - 11.1 Apply necessary code fixes for review findings
     - 11.2 Re-run security audit by subagent and produce report
   - tests:
-    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/security-2.md
-    - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/security-2.md - success_all
+    - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build - success_all
   - git_commit: pending
 
 - [ ] Шаг 12: Generate create_issue.md and create_pr.md for Directus maintainers

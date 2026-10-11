@@ -1,6 +1,6 @@
 {
 	"name": "calendar-colored",
-	"description": "Please enter a description for your extension",
+	"description": "Colored calendar layout for Directus with task contrast styling",
 	"icon": "extension",
 	"version": "1.0.0",
 	"keywords": [
@@ -27,6 +27,7 @@
 	"devDependencies": {
 		"@directus/extensions-sdk": "18.0.6",
 		"typescript": "^5.4.5",
-		"vue": "^3.5.43"
+		"vue": "^3.5.43",
+		"vue-router": "^4.6.3"
 	}
 }

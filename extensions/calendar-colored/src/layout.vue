@@ -81,14 +81,18 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useApi } from '@directus/extensions-sdk';
+
+const NAMED_DARK_COLORS = new Set(['red', 'blue', 'green', 'black', 'purple', 'brown', 'navy', 'darkblue']);
+const NAMED_LIGHT_COLORS = new Set(['yellow', 'white', 'orange', 'cyan', 'lime', 'pink']);
 
 interface TaskItem {
 	id: string | number;
 	Title?: string;
 	name?: string;
-	Start?: string | null;
-	End?: string | null;
+	Start?: string | number | null;
+	End?: string | number | null;
 	Color?: string | null;
 	color?: string | null;
 	Status?: string | null;
@@ -114,6 +118,7 @@ export default defineComponent({
 	},
 	setup(props) {
 		const api = useApi();
+		const router = useRouter();
 		const items = ref<TaskItem[]>([]);
 		const loading = ref(false);
 		const currentDate = ref(new Date());
@@ -130,32 +135,31 @@ export default defineComponent({
 			return `${year}-${month}-${day}`;
 		};
 
-		// Safely extract YYYY-MM-DD from ISO string/number respecting local timezone
+		// Safely extract YYYY-MM-DD from ISO string/number respecting local dates and numeric epoch timestamps
 		const getItemDateKey = (val: unknown): string | null => {
-			if (!val) return null;
-			const d = new Date(String(val));
+			if (val === null || val === undefined || val === '') return null;
+			const str = String(val).trim();
+			// Date-only string (YYYY-MM-DD) avoids UTC day-shift
+			if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+				return str;
+			}
+			// Epoch timestamp (numeric) or ISO string
+			const d = typeof val === 'number' || /^\d+$/.test(str)
+				? new Date(Number(val))
+				: new Date(str);
 			if (isNaN(d.getTime())) return null;
 			return formatDateKey(d);
 		};
 
-		// Check if two dates represent the same day
-		const isSameDay = (d1: Date, d2: Date): boolean => {
-			return (
-				d1.getFullYear() === d2.getFullYear() &&
-				d1.getMonth() === d2.getMonth() &&
-				d1.getDate() === d2.getDate()
-			);
-		};
-
-		// Load items from current collection with bounding limit
+		// Load items from current collection with bounding limit and restricted fields
 		const fetchItems = async () => {
 			if (!props.collection) return;
 			loading.value = true;
 			try {
-				const response = await api.get(`/items/${props.collection}`, {
+				const response = await api.get(`/items/${encodeURIComponent(props.collection)}`, {
 					params: {
 						limit: 500,
-						fields: ['*'],
+						fields: ['id', 'Title', 'title', 'name', 'Start', 'start', 'End', 'end', 'Color', 'color', 'Status', 'status'],
 					},
 				});
 				items.value = response.data?.data || [];
@@ -216,7 +220,7 @@ export default defineComponent({
 
 		// Calendar cells grid
 		const calendarCells = computed<CalendarCell[]>(() => {
-			const today = new Date();
+			const todayKey = formatDateKey(new Date());
 			const cells: CalendarCell[] = [];
 			const baseDate = currentDate.value;
 
@@ -232,12 +236,13 @@ export default defineComponent({
 				// Previous month days to pad first week
 				for (let i = startDayIndex - 1; i >= 0; i--) {
 					const prevDate = new Date(year, month, -i);
+					const dateKey = formatDateKey(prevDate);
 					cells.push({
 						date: prevDate,
-						dateKey: formatDateKey(prevDate),
+						dateKey,
 						dayNumber: prevDate.getDate(),
 						isCurrentMonth: false,
-						isToday: isSameDay(prevDate, today),
+						isToday: dateKey === todayKey,
 						events: [],
 					});
 				}
@@ -246,12 +251,13 @@ export default defineComponent({
 				const daysInMonth = new Date(year, month + 1, 0).getDate();
 				for (let day = 1; day <= daysInMonth; day++) {
 					const date = new Date(year, month, day);
+					const dateKey = formatDateKey(date);
 					cells.push({
 						date,
-						dateKey: formatDateKey(date),
+						dateKey,
 						dayNumber: day,
 						isCurrentMonth: true,
-						isToday: isSameDay(date, today),
+						isToday: dateKey === todayKey,
 						events: [],
 					});
 				}
@@ -261,12 +267,13 @@ export default defineComponent({
 				if (remainingCells < 7) {
 					for (let day = 1; day <= remainingCells; day++) {
 						const nextDate = new Date(year, month + 1, day);
+						const dateKey = formatDateKey(nextDate);
 						cells.push({
 							date: nextDate,
-							dateKey: formatDateKey(nextDate),
+							dateKey,
 							dayNumber: day,
 							isCurrentMonth: false,
-							isToday: isSameDay(nextDate, today),
+							isToday: dateKey === todayKey,
 							events: [],
 						});
 					}
@@ -277,40 +284,48 @@ export default defineComponent({
 				const firstDayNumber = curr.getDate() - ((curr.getDay() + 6) % 7);
 				for (let i = 0; i < 7; i++) {
 					const weekDate = new Date(curr.getFullYear(), curr.getMonth(), firstDayNumber + i);
+					const dateKey = formatDateKey(weekDate);
 					cells.push({
 						date: weekDate,
-						dateKey: formatDateKey(weekDate),
+						dateKey,
 						dayNumber: weekDate.getDate(),
 						isCurrentMonth: weekDate.getMonth() === baseDate.getMonth(),
-						isToday: isSameDay(weekDate, today),
+						isToday: dateKey === todayKey,
 						events: [],
 					});
 				}
 			}
 
-			// Bind task items to cells across Start / End range using local dates
+			// Precompute item keys once to avoid O(cells * N) date parsing churn
+			const mappedTasks = items.value.map((item) => {
+				const startKey = getItemDateKey(item.Start);
+				const endKey = getItemDateKey(item.End) || startKey;
+				return { item, startKey, endKey };
+			}).filter((t): t is { item: TaskItem; startKey: string; endKey: string } => !!t.startKey && !!t.endKey);
+
+			// Bind task items to cells across Start / End range
 			for (const cell of cells) {
-				cell.events = items.value.filter((item) => {
-					const startKey = getItemDateKey(item.Start);
-					if (!startKey) return false;
-					const endKey = getItemDateKey(item.End) || startKey;
-					return cell.dateKey >= startKey && cell.dateKey <= endKey;
-				});
+				cell.events = mappedTasks
+					.filter((t) => cell.dateKey >= t.startKey && cell.dateKey <= t.endKey)
+					.map((t) => t.item);
 			}
 
 			return cells;
 		});
 
-		// WCAG relative luminance formula for text contrast (supports named colors, 3- and 6-digit hex)
+		// WCAG relative luminance formula for text contrast (supports named colors, 3-, 6-, and 8-digit hex)
 		const getContrastTextColor = (hexColor: unknown): string => {
 			if (typeof hexColor !== 'string') return '#ffffff';
-			const namedDark = ['red', 'blue', 'green', 'black', 'purple', 'brown', 'navy', 'darkblue'];
-			if (namedDark.includes(hexColor.toLowerCase())) return '#ffffff';
-			const namedLight = ['yellow', 'white', 'orange', 'cyan', 'lime', 'pink'];
-			if (namedLight.includes(hexColor.toLowerCase())) return '#0f172a';
+			const lower = hexColor.toLowerCase().trim();
+			if (NAMED_DARK_COLORS.has(lower)) return '#ffffff';
+			if (NAMED_LIGHT_COLORS.has(lower)) return '#0f172a';
 
-			if (!hexColor.startsWith('#')) return '#ffffff';
-			let clean = hexColor.slice(1).trim();
+			if (!lower.startsWith('#')) return '#ffffff';
+			let clean = lower.slice(1).trim();
+			// Strip alpha channel if 8-digit hex (#RRGGBBAA)
+			if (clean.length === 8) {
+				clean = clean.slice(0, 6);
+			}
 			// Expand short #RGB format to #RRGGBB
 			if (clean.length === 3) {
 				clean = clean.split('').map((c) => c + c).join('');
@@ -339,7 +354,10 @@ export default defineComponent({
 			const status = item.Status ? ` [${item.Status}]` : '';
 			let timeInfo = '';
 			if (item.Start) {
-				const d = new Date(String(item.Start));
+				const str = String(item.Start).trim();
+				const d = typeof item.Start === 'number' || /^\d+$/.test(str)
+					? new Date(Number(item.Start))
+					: new Date(str);
 				if (!isNaN(d.getTime())) {
 					const hours = String(d.getHours()).padStart(2, '0');
 					const mins = String(d.getMinutes()).padStart(2, '0');
@@ -349,13 +367,17 @@ export default defineComponent({
 			return `${title}${status}${timeInfo}`;
 		};
 
-		// Secure navigation to Directus item edit form
+		// SPA navigation to Directus item edit form with fallback
 		const openItem = (item: TaskItem) => {
 			if (!item?.id || !props.collection) return;
 			const col = encodeURIComponent(String(props.collection));
 			const id = encodeURIComponent(String(item.id));
-			const targetUrl = `/admin/content/${col}/${id}`;
-			window.location.href = targetUrl;
+			const path = `/content/${col}/${id}`;
+			if (router) {
+				router.push(path);
+			} else {
+				window.location.href = `/admin${path}`;
+			}
 		};
 
 		return {
