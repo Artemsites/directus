@@ -53,4 +53,19 @@
   - `curl -s http://127.0.0.1:8055/items/Tasks/89?fields=id,Title,Color` → `{"data":{"id":89,"Title":"...","Color":"#3b82f6"}}` — `success_all`
   - `npm --prefix extensions/calendar-colored run build` — `success_all`
   - `grep -q "Color" database/schema.yaml` — `success_all`
+- **Коммит:** `e9ccf0b` (feat(schema): migrate color to Color field and support it in calendar extension)
+
+## Шаг 6: Исправление замечаний Security & Ponytail Review (Must fix)
+- **Что сделано:**
+  1. Ограничение запроса: в `fetchItems` заменён `limit: -1` на `limit: 500` для предотвращения переполнения памяти сервера и зависания вкладки.
+  2. Исправлен расчет шапки недели: заменена мутация даты in-place на создание независимых `Date` объектов, устранено искажение диапазона при переходе через границу месяца.
+  3. Исправлена навигация по месяцам: добавлена фиксация `d.setDate(1)` перед изменением месяца, устранено застревание и перескок на 29–31 числах.
+  4. Поддержка 3-значного hex в YIQ: добавлено автоматическое разворачивание `#RGB` в `#RRGGBB` и строгие type guards, предотвращен невидимый белый текст на светлом фоне.
+  5. Устранен сдвиг по часовым поясам: парсинг дат через локальный `getItemDateKey`, корректное отображение локального времени в подсказках.
+  6. Поддержка многодневных задач: события фильтруются по диапазону `dateKey >= startKey && dateKey <= endKey`.
+  7. Безопасность навигации: добавлено экранирование URI (`encodeURIComponent`) в `openItem`.
+  8. Исправлена некорректная версия зависимостей: `"typescript": "^5.4.5"` в `package.json`.
+- **Тесты:**
+  - `npm --prefix extensions/calendar-colored run build` — `success_all`
+  - `docker compose restart directus` — `success_all`
 - **Коммит:** готовится к фиксации

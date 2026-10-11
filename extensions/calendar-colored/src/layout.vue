@@ -122,12 +122,20 @@ export default defineComponent({
 		const weekDayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 		const defaultEventColor = '#2ECDA7'; // Фирменный цвет Directus по умолчанию
 
-		// Форматирование даты в YYYY-MM-DD
+		// Форматирование даты в YYYY-MM-DD в локальном часовом поясе
 		const formatDateKey = (d: Date): string => {
 			const year = d.getFullYear();
 			const month = String(d.getMonth() + 1).padStart(2, '0');
 			const day = String(d.getDate()).padStart(2, '0');
 			return `${year}-${month}-${day}`;
+		};
+
+		// Безопасное получение YYYY-MM-DD из ISO-строки/числа с учетом локального часового пояса
+		const getItemDateKey = (val: unknown): string | null => {
+			if (!val) return null;
+			const d = new Date(String(val));
+			if (isNaN(d.getTime())) return null;
+			return formatDateKey(d);
 		};
 
 		// Проверка на "сегодня"
@@ -139,14 +147,14 @@ export default defineComponent({
 			);
 		};
 
-		// Загрузка элементов из текущей коллекции
+		// Загрузка элементов из текущей коллекции с ограничением выборки
 		const fetchItems = async () => {
 			if (!props.collection) return;
 			loading.value = true;
 			try {
 				const response = await api.get(`/items/${props.collection}`, {
 					params: {
-						limit: -1,
+						limit: 500,
 						fields: ['id', 'Title', 'name', 'Start', 'End', 'Color', 'color', 'Status'],
 					},
 				});
@@ -161,7 +169,7 @@ export default defineComponent({
 		onMounted(fetchItems);
 		watch(() => props.collection, fetchItems);
 
-		// Заголовок текущего периода
+		// Заголовок текущего периода (с иммутабельным расчетом границ недели)
 		const currentPeriodTitle = computed(() => {
 			const months = [
 				'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
@@ -171,18 +179,19 @@ export default defineComponent({
 			if (currentView.value === 'month') {
 				return `${months[d.getMonth()]} ${d.getFullYear()}`;
 			}
-			// Для вида недели показываем интервал
+			// Для вида недели: вычисляем независимые даты без in-place мутации
 			const curr = new Date(d);
-			const first = curr.getDate() - ((curr.getDay() + 6) % 7);
-			const firstDay = new Date(curr.setDate(first));
-			const lastDay = new Date(curr.setDate(first + 6));
+			const dayOfWeek = (curr.getDay() + 6) % 7;
+			const firstDay = new Date(curr.getFullYear(), curr.getMonth(), curr.getDate() - dayOfWeek);
+			const lastDay = new Date(firstDay.getFullYear(), firstDay.getMonth(), firstDay.getDate() + 6);
 			return `${firstDay.getDate()} ${months[firstDay.getMonth()]} - ${lastDay.getDate()} ${months[lastDay.getMonth()]} ${lastDay.getFullYear()}`;
 		});
 
-		// Навигация
+		// Навигация (с фиксацией 1-го числа при смене месяца во избежание перескока на 29-31 днях)
 		const prevPeriod = () => {
 			const d = new Date(currentDate.value);
 			if (currentView.value === 'month') {
+				d.setDate(1);
 				d.setMonth(d.getMonth() - 1);
 			} else {
 				d.setDate(d.getDate() - 7);
@@ -193,6 +202,7 @@ export default defineComponent({
 		const nextPeriod = () => {
 			const d = new Date(currentDate.value);
 			if (currentView.value === 'month') {
+				d.setDate(1);
 				d.setMonth(d.getMonth() + 1);
 			} else {
 				d.setDate(d.getDate() + 7);
@@ -278,22 +288,28 @@ export default defineComponent({
 				}
 			}
 
-			// Привязка задач к ячейкам календаря по полям Start / End
+			// Привязка задач к ячейкам календаря по диапазону Start / End с локальным временем
 			for (const cell of cells) {
 				cell.events = items.value.filter((item) => {
-					if (!item.Start) return false;
-					const itemDateKey = item.Start.slice(0, 10);
-					return itemDateKey === cell.dateKey;
+					const startKey = getItemDateKey(item.Start);
+					if (!startKey) return false;
+					const endKey = getItemDateKey(item.End) || startKey;
+					return cell.dateKey >= startKey && cell.dateKey <= endKey;
 				});
 			}
 
 			return cells;
 		});
 
-		// WCAG-формула относительной яркости для контрастного текста
-		const getContrastTextColor = (hexColor: string | null | undefined): string => {
-			if (!hexColor || !hexColor.startsWith('#')) return '#ffffff';
-			const clean = hexColor.replace('#', '');
+		// WCAG-формула относительной яркости для контрастного текста (с поддержкой 3- и 6-значных hex)
+		const getContrastTextColor = (hexColor: unknown): string => {
+			if (typeof hexColor !== 'string' || !hexColor.startsWith('#')) return '#ffffff';
+			let clean = hexColor.slice(1).trim();
+			// Разворачиваем короткий формат #RGB в #RRGGBB
+			if (clean.length === 3) {
+				clean = clean.split('').map((c) => c + c).join('');
+			}
+			if (clean.length !== 6) return '#ffffff';
 			const r = parseInt(clean.substring(0, 2), 16) || 0;
 			const g = parseInt(clean.substring(2, 4), 16) || 0;
 			const b = parseInt(clean.substring(4, 6), 16) || 0;
@@ -315,13 +331,24 @@ export default defineComponent({
 		const getEventTooltip = (item: TaskItem): string => {
 			const title = item.Title || item.name || `Задача #${item.id}`;
 			const status = item.Status ? ` [${item.Status}]` : '';
-			const start = item.Start ? ` (${item.Start.slice(11, 16) || item.Start.slice(0, 10)})` : '';
-			return `${title}${status}${start}`;
+			let timeInfo = '';
+			if (item.Start) {
+				const d = new Date(String(item.Start));
+				if (!isNaN(d.getTime())) {
+					const hours = String(d.getHours()).padStart(2, '0');
+					const mins = String(d.getMinutes()).padStart(2, '0');
+					timeInfo = ` (${hours}:${mins})`;
+				}
+			}
+			return `${title}${status}${timeInfo}`;
 		};
 
-		// Переход к форме редактирования элемента в Directus
+		// Безопасный переход к форме редактирования элемента в Directus
 		const openItem = (item: TaskItem) => {
-			const targetUrl = `/admin/content/${props.collection}/${item.id}`;
+			if (!item?.id || !props.collection) return;
+			const col = encodeURIComponent(String(props.collection));
+			const id = encodeURIComponent(String(item.id));
+			const targetUrl = `/admin/content/${col}/${id}`;
 			window.location.href = targetUrl;
 		};
 
