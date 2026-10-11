@@ -184,15 +184,15 @@ reviewer=owner auto_start=1
     - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build - success_all
   - git_commit: pending
 
-- [ ] Шаг 15: Create Directus core patch and apply to container calendar layout
-  - status: todo, starts: 0
+- [x] Шаг 15: Create Directus core patch and apply to container calendar layout
+  - status: done, starts: 1
   - model: mid, effort: medium
   - diag: Built-in calendar needs highlight_color support → create clean git patch for directus repo and apply to container
   - more:
     - 15.1 Create patch file patches/directus-calendar-highlight-color.patch for app/src/layouts/calendar
     - 15.2 Apply patch to container assets so built-in calendar colors task cards
   - tests:
-    - test -f /Users/artem/git_craft/_directus/patches/directus-calendar-highlight-color.patch
+    - test -f /Users/artem/git_craft/_directus/patches/directus-calendar-highlight-color.patch - success_all
   - git_commit: pending
 
 - [ ] Шаг 16: End-to-end verification and update upstream documentation
