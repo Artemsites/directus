@@ -162,15 +162,15 @@ reviewer=owner auto_start=1
     - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_pr.md - success_all
   - git_hash: 3b4c937
 
-- [ ] Шаг 13: Add highlight_color field to Tasks schema
-  - status: todo, starts: 0
+- [x] Шаг 13: Add highlight_color field to Tasks schema
+  - status: done, starts: 1
   - model: lite, effort: low
   - diag: User requested highlight_color field → add to Tasks collection and export schema snapshot
   - more:
     - 13.1 Create highlight_color string field with select-color interface via Directus API
     - 13.2 Update database/schema.yaml snapshot
   - tests:
-    - grep -q "highlight_color" /Users/artem/git_craft/_directus/database/schema.yaml
+    - grep -q "highlight_color" /Users/artem/git_craft/_directus/database/schema.yaml - success_all
   - git_commit: pending
 
 - [ ] Шаг 14: Support highlight_color in layout extension and rebuild
