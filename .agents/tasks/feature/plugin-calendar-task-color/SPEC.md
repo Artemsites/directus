@@ -1,11 +1,13 @@
 # Task
 
-Implement a custom Directus extension/layout plugin that displays colored task cards in calendar views based on a new `Color` field added to the `Tasks` collection schema.
-
 * Language requirement: English only for all files in this branch, including owner markdown files.
+**Implement a Directus path that displays colored task cards in Calendar (layout)**
+* To do this, make an additional parameter `highlight_color` to make the functionality work.
+* The new `highlight_color` field add to the `Tasks` collection schema.
 
 # Do After Task Realize
 
+* Double check that you haven't done anything extra beyond SPEC.
 * Run subagent security review.
 * Run subagent clean code and architecture review by ponytail-reviewer across the whole branch.
 * Re-run subagent security review to verify fixes.
@@ -13,5 +15,3 @@ Implement a custom Directus extension/layout plugin that displays colored task c
 * Then create README.md to module/component code with how to use this.
 
 # Bugs
-
-* None currently identified.
