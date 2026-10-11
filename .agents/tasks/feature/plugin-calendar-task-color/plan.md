@@ -162,3 +162,49 @@ reviewer=owner auto_start=1
     - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_pr.md - success_all
   - git_hash: 3b4c937
 
+- [ ] Шаг 13: Add highlight_color field to Tasks schema
+  - status: todo, starts: 0
+  - model: lite, effort: low
+  - diag: User requested highlight_color field → add to Tasks collection and export schema snapshot
+  - more:
+    - 13.1 Create highlight_color string field with select-color interface via Directus API
+    - 13.2 Update database/schema.yaml snapshot
+  - tests:
+    - grep -q "highlight_color" /Users/artem/git_craft/_directus/database/schema.yaml
+  - git_commit: pending
+
+- [ ] Шаг 14: Support highlight_color in layout extension and rebuild
+  - status: todo, starts: 0
+  - model: lite, effort: low
+  - diag: Extension layout needs highlight_color support → update layout.vue and recompile bundle
+  - more:
+    - 14.1 Map item.highlight_color with fallback to item.Color in layout.vue
+    - 14.2 Build bundle via directus-extension build
+  - tests:
+    - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build
+  - git_commit: pending
+
+- [ ] Шаг 15: Create Directus core patch and apply to container calendar layout
+  - status: todo, starts: 0
+  - model: mid, effort: medium
+  - diag: Built-in calendar needs highlight_color support → create clean git patch for directus repo and apply to container
+  - more:
+    - 15.1 Create patch file patches/directus-calendar-highlight-color.patch for app/src/layouts/calendar
+    - 15.2 Apply patch to container assets so built-in calendar colors task cards
+  - tests:
+    - test -f /Users/artem/git_craft/_directus/patches/directus-calendar-highlight-color.patch
+  - git_commit: pending
+
+- [ ] Шаг 16: End-to-end verification and update upstream documentation
+  - status: todo, starts: 0
+  - model: mid, effort: medium
+  - diag: Full flow verification → test task with highlight_color, update README, create_issue.md, and create_pr.md
+  - more:
+    - 16.1 Update Task item with highlight_color and verify API response
+    - 16.2 Update extensions/calendar-colored/README.md, create_issue.md, and create_pr.md
+    - 16.3 Run subagent security review check
+  - tests:
+    - grep -q "highlight_color" /Users/artem/git_craft/_directus/extensions/calendar-colored/README.md
+    - grep -q "highlight_color" /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_pr.md
+  - git_commit: pending
+
