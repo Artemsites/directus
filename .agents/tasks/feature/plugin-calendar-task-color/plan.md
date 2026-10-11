@@ -114,7 +114,7 @@ reviewer=owner auto_start=1
   - git_hash: e51abfb
 
 - [x] Шаг 9: Subagent security review of branch changes
-  - status: review, starts: 1
+  - status: done, starts: 1
   - model: mid, effort: medium
   - agent: security
   - diag: Security audit of extension and schema → inspect extensions/calendar-colored and API for vulnerabilities
@@ -122,11 +122,11 @@ reviewer=owner auto_start=1
     - 9.1 Check for XSS, injections, data leakage, and authorization vulnerabilities in extensions/calendar-colored
     - 9.2 Compile report in .agents/tasks/feature/plugin-calendar-task-color/reviews/security-1.md
   - tests:
-    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/security-1.md
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/security-1.md - success_all
   - git_hash: 403cc6f
 
 - [x] Шаг 10: Subagent clean code and architecture review across whole branch via ponytail-reviewer
-  - status: review, starts: 1
+  - status: done, starts: 1
   - model: mid, effort: medium
   - agent: ponytail-reviewer
   - diag: Clean code and architecture audit across branch → evaluate against ponytail guidelines (KISS, YAGNI, DRY, SSoT)
@@ -135,7 +135,7 @@ reviewer=owner auto_start=1
     - 10.2 Compile report in .agents/tasks/feature/plugin-calendar-task-color/reviews/ponytail.md
   - tests:
     - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/ponytail.md - success_all
-  - git_commit: pending
+  - git_hash: f579db5
 
 - [x] Шаг 11: Resolve findings and follow-up subagent security review
   - status: done, starts: 1
@@ -148,7 +148,7 @@ reviewer=owner auto_start=1
   - tests:
     - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/security-2.md - success_all
     - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build - success_all
-  - git_commit: pending
+  - git_hash: 94b80f6
 
 - [x] Шаг 12: Generate create_issue.md and create_pr.md for Directus maintainers
   - status: done, starts: 1
@@ -160,5 +160,5 @@ reviewer=owner auto_start=1
   - tests:
     - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_issue.md - success_all
     - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_pr.md - success_all
-  - git_commit: pending
+  - git_hash: 3b4c937
 
