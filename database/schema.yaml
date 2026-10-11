@@ -483,7 +483,7 @@ fields:
         slug: true
         trim: true
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 11
       special: null
