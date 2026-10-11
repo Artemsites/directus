@@ -31,11 +31,12 @@ A companion git patch is provided in:
  				fields.push(endDateField.value);
  			}
 +
-+			// Include highlight_color if present on collection for task card coloring
-+			const hasHighlightColor = fieldsInCollection.value.some((f: Field) => ['highlight_color', 'Color', 'color'].includes(f.field));
-+			if (hasHighlightColor) {
-+				fields.push('highlight_color', 'Color', 'color');
-+			}
++			// Include highlight_color or Color if present on collection for task card coloring
++			fieldsInCollection.value.forEach((f: Field) => {
++				if (['highlight_color', 'Color', 'color'].includes(f.field)) {
++					fields.push(f.field);
++				}
++			});
  
  			return [...fields, ...adjustFieldsForDisplays(fields, collection.value)];
  		});
