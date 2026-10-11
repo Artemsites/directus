@@ -155,7 +155,7 @@ export default defineComponent({
 				const response = await api.get(`/items/${props.collection}`, {
 					params: {
 						limit: 500,
-						fields: ['id', 'Title', 'name', 'Start', 'End', 'Color', 'color', 'Status'],
+						fields: ['*'],
 					},
 				});
 				items.value = response.data?.data || [];
@@ -301,9 +301,15 @@ export default defineComponent({
 			return cells;
 		});
 
-		// WCAG-формула относительной яркости для контрастного текста (с поддержкой 3- и 6-значных hex)
+		// WCAG-формула относительной яркости для контрастного текста (с поддержкой named colors, 3- и 6-значных hex)
 		const getContrastTextColor = (hexColor: unknown): string => {
-			if (typeof hexColor !== 'string' || !hexColor.startsWith('#')) return '#ffffff';
+			if (typeof hexColor !== 'string') return '#ffffff';
+			const namedDark = ['red', 'blue', 'green', 'black', 'purple', 'brown', 'navy', 'darkblue'];
+			if (namedDark.includes(hexColor.toLowerCase())) return '#ffffff';
+			const namedLight = ['yellow', 'white', 'orange', 'cyan', 'lime', 'pink'];
+			if (namedLight.includes(hexColor.toLowerCase())) return '#0f172a';
+
+			if (!hexColor.startsWith('#')) return '#ffffff';
 			let clean = hexColor.slice(1).trim();
 			// Разворачиваем короткий формат #RGB в #RRGGBB
 			if (clean.length === 3) {
