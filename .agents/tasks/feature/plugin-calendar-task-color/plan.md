@@ -150,15 +150,15 @@ reviewer=owner auto_start=1
     - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build - success_all
   - git_commit: pending
 
-- [ ] Шаг 12: Generate create_issue.md and create_pr.md for Directus maintainers
-  - status: todo, starts: 0
+- [x] Шаг 12: Generate create_issue.md and create_pr.md for Directus maintainers
+  - status: done, starts: 1
   - model: lite, effort: low
   - diag: Prepare materials for upstream contribution to Directus → produce create_issue.md and create_pr.md
   - more:
     - 12.1 Format create_issue.md with problem description, use cases, and proposed solution
     - 12.2 Format create_pr.md with change summary, installation guide, and test plan
   - tests:
-    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_issue.md
-    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_pr.md
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_issue.md - success_all
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_pr.md - success_all
   - git_commit: pending
 
