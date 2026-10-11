@@ -6,7 +6,7 @@
 - Шаг 3: mid/high
 - Шаг 4: lite/medium
 
-- [ ] Шаг 1: Добавлено поле выбора цвета Color в коллекцию Tasks
+- [x] Шаг 1: Добавлено поле выбора цвета Color в коллекцию Tasks
   - model: mid, effort: medium
   - diag: В Tasks отсутствуют данные цвета → добавление поля color в схему Tasks через Directus API/схему
   - more:
@@ -16,9 +16,9 @@
   - tests:
     - docker compose -f /Users/artem/git_craft/_directus/docker-compose.yml exec directus npx directus schema snapshot -y /directus/database/schema.yaml
     - grep -q "color" /Users/artem/git_craft/_directus/database/schema.yaml
-  - git_commit: pending
+  - git_hash: 3f78eed
 
-- [ ] Шаг 2: Инициализирован каркас Layout Extension в папке extensions
+- [x] Шаг 2: Инициализирован каркас Layout Extension в папке extensions
   - model: mid, effort: medium
   - diag: Папка extensions пуста → создание структуры пакета layout extension
   - more:
@@ -28,9 +28,9 @@
   - tests:
     - test -f /Users/artem/git_craft/_directus/extensions/calendar-colored/package.json
     - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build
-  - git_commit: pending
+  - git_hash: cc32f5e
 
-- [ ] Шаг 3: Реализован компонент календаря с цветными карточками задач и контрастом текста
+- [x] Шаг 3: Реализован компонент календаря с цветными карточками задач и контрастом текста
   - model: mid, effort: high
   - diag: Базовый календарь не красит события → реализация отрисовки карточек с динамическим цветом и расчетом контраста
   - more:
@@ -41,7 +41,7 @@
   - tests:
     - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build
     - test -f /Users/artem/git_craft/_directus/extensions/calendar-colored/dist/index.js
-  - git_commit: pending
+  - git_hash: b2d30ad
 
 - [ ] Шаг 4: Расширение подключено в Directus и проверено в интерфейсе
   - model: lite, effort: medium
