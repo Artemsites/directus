@@ -10,3 +10,13 @@ environment:
 ```
 
 docker-compose up -d
+
+## Рекомендация по версионированию БД:
+
+Бинарный data.db в Git сохраняет данные, но в коммитах не даёт диффа изменений (не видно, какое поле или
+коллекция добавились).
+В Directus для этого есть штатный механизм снимков:
+
+docker compose exec directus npx directus schema snapshot -y /directus/database/schema.yaml
+
+Он создаёт человекочитаемый YAML с описанием всех коллекций, полей и связей для понятной истории в Git.
