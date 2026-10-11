@@ -1,11 +1,11 @@
 <template>
 	<div class="colored-calendar-layout">
-		<!-- Шапка календаря: навигация по датам и переключение вида -->
+		<!-- Calendar header: date navigation and view switch -->
 		<div class="calendar-header">
 			<div class="header-left">
-				<button class="nav-btn" @click="prevPeriod" title="Предыдущий период">‹</button>
-				<button class="today-btn" @click="goToToday">Сегодня</button>
-				<button class="nav-btn" @click="nextPeriod" title="Следующий период">›</button>
+				<button class="nav-btn" @click="prevPeriod" title="Previous period">‹</button>
+				<button class="today-btn" @click="goToToday">Today</button>
+				<button class="nav-btn" @click="nextPeriod" title="Next period">›</button>
 				<h2 class="current-period-title">{{ currentPeriodTitle }}</h2>
 			</div>
 
@@ -15,36 +15,36 @@
 						:class="['switch-btn', { active: currentView === 'month' }]"
 						@click="currentView = 'month'"
 					>
-						Месяц
+						Month
 					</button>
 					<button
 						:class="['switch-btn', { active: currentView === 'week' }]"
 						@click="currentView = 'week'"
 					>
-						Неделя
+						Week
 					</button>
 				</div>
-				<button class="refresh-btn" @click="fetchItems" :disabled="loading" title="Обновить задачи">
+				<button class="refresh-btn" @click="fetchItems" :disabled="loading" title="Refresh tasks">
 					<span :class="['refresh-icon', { spinning: loading }]">↻</span>
 				</button>
 			</div>
 		</div>
 
-		<!-- Индикатор загрузки -->
+		<!-- Loading state -->
 		<div v-if="loading && items.length === 0" class="loading-state">
-			Загрузка календаря...
+			Loading calendar...
 		</div>
 
-		<!-- Сетка календаря -->
+		<!-- Calendar grid container -->
 		<div v-else class="calendar-grid-container">
-			<!-- Заголовки дней недели -->
+			<!-- Weekday headers row -->
 			<div class="weekdays-row">
 				<div v-for="day in weekDayNames" :key="day" class="weekday-header">
 					{{ day }}
 				</div>
 			</div>
 
-			<!-- Дни сетки -->
+			<!-- Grid cells -->
 			<div class="calendar-grid">
 				<div
 					v-for="cell in calendarCells"
@@ -70,7 +70,7 @@
 							:title="getEventTooltip(item)"
 							@click="openItem(item)"
 						>
-							<span class="event-title">{{ item.Title || item.name || `Задача #${item.id}` }}</span>
+							<span class="event-title">{{ item.Title || item.name || `Task #${item.id}` }}</span>
 						</div>
 					</div>
 				</div>
@@ -119,10 +119,10 @@ export default defineComponent({
 		const currentDate = ref(new Date());
 		const currentView = ref<'month' | 'week'>('month');
 
-		const weekDayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-		const defaultEventColor = '#2ECDA7'; // Фирменный цвет Directus по умолчанию
+		const weekDayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+		const defaultEventColor = '#2ECDA7'; // Default Directus brand primary color
 
-		// Форматирование даты в YYYY-MM-DD в локальном часовом поясе
+		// Format date to YYYY-MM-DD in local timezone
 		const formatDateKey = (d: Date): string => {
 			const year = d.getFullYear();
 			const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -130,7 +130,7 @@ export default defineComponent({
 			return `${year}-${month}-${day}`;
 		};
 
-		// Безопасное получение YYYY-MM-DD из ISO-строки/числа с учетом локального часового пояса
+		// Safely extract YYYY-MM-DD from ISO string/number respecting local timezone
 		const getItemDateKey = (val: unknown): string | null => {
 			if (!val) return null;
 			const d = new Date(String(val));
@@ -138,7 +138,7 @@ export default defineComponent({
 			return formatDateKey(d);
 		};
 
-		// Проверка на "сегодня"
+		// Check if two dates represent the same day
 		const isSameDay = (d1: Date, d2: Date): boolean => {
 			return (
 				d1.getFullYear() === d2.getFullYear() &&
@@ -147,7 +147,7 @@ export default defineComponent({
 			);
 		};
 
-		// Загрузка элементов из текущей коллекции с ограничением выборки
+		// Load items from current collection with bounding limit
 		const fetchItems = async () => {
 			if (!props.collection) return;
 			loading.value = true;
@@ -160,7 +160,7 @@ export default defineComponent({
 				});
 				items.value = response.data?.data || [];
 			} catch (err) {
-				console.error('Ошибка загрузки задач для календаря:', err);
+				console.error('Failed to load tasks for calendar:', err);
 			} finally {
 				loading.value = false;
 			}
@@ -169,17 +169,17 @@ export default defineComponent({
 		onMounted(fetchItems);
 		watch(() => props.collection, fetchItems);
 
-		// Заголовок текущего периода (с иммутабельным расчетом границ недели)
+		// Current period title with immutable week range calculation
 		const currentPeriodTitle = computed(() => {
 			const months = [
-				'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-				'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь',
+				'January', 'February', 'March', 'April', 'May', 'June',
+				'July', 'August', 'September', 'October', 'November', 'December',
 			];
 			const d = currentDate.value;
 			if (currentView.value === 'month') {
 				return `${months[d.getMonth()]} ${d.getFullYear()}`;
 			}
-			// Для вида недели: вычисляем независимые даты без in-place мутации
+			// For week view: compute independent dates without in-place mutation
 			const curr = new Date(d);
 			const dayOfWeek = (curr.getDay() + 6) % 7;
 			const firstDay = new Date(curr.getFullYear(), curr.getMonth(), curr.getDate() - dayOfWeek);
@@ -187,7 +187,7 @@ export default defineComponent({
 			return `${firstDay.getDate()} ${months[firstDay.getMonth()]} - ${lastDay.getDate()} ${months[lastDay.getMonth()]} ${lastDay.getFullYear()}`;
 		});
 
-		// Навигация (с фиксацией 1-го числа при смене месяца во избежание перескока на 29-31 днях)
+		// Navigation (with day 1 pinning before month transitions to avoid month-skipping on days 29-31)
 		const prevPeriod = () => {
 			const d = new Date(currentDate.value);
 			if (currentView.value === 'month') {
@@ -214,7 +214,7 @@ export default defineComponent({
 			currentDate.value = new Date();
 		};
 
-		// Сетка дней календаря
+		// Calendar cells grid
 		const calendarCells = computed<CalendarCell[]>(() => {
 			const today = new Date();
 			const cells: CalendarCell[] = [];
@@ -224,12 +224,12 @@ export default defineComponent({
 				const year = baseDate.getFullYear();
 				const month = baseDate.getMonth();
 
-				// Первый день месяца
+				// First day of current month
 				const firstDayOfMonth = new Date(year, month, 1);
-				// День недели (0=Вс -> 6, 1=Пн -> 0)
+				// Day of week index (0=Sun -> 6, 1=Mon -> 0)
 				const startDayIndex = (firstDayOfMonth.getDay() + 6) % 7;
 
-				// Дни предыдущего месяца для заполнения первой недели
+				// Previous month days to pad first week
 				for (let i = startDayIndex - 1; i >= 0; i--) {
 					const prevDate = new Date(year, month, -i);
 					cells.push({
@@ -242,7 +242,7 @@ export default defineComponent({
 					});
 				}
 
-				// Дни текущего месяца
+				// Current month days
 				const daysInMonth = new Date(year, month + 1, 0).getDate();
 				for (let day = 1; day <= daysInMonth; day++) {
 					const date = new Date(year, month, day);
@@ -256,7 +256,7 @@ export default defineComponent({
 					});
 				}
 
-				// Дни следующего месяца для завершения сетки (кратно 7)
+				// Next month days to complete remaining cells (multiple of 7)
 				const remainingCells = 7 - (cells.length % 7);
 				if (remainingCells < 7) {
 					for (let day = 1; day <= remainingCells; day++) {
@@ -272,7 +272,7 @@ export default defineComponent({
 					}
 				}
 			} else {
-				// Вид недели (ровно 7 дней текущей недели)
+				// Week view (exactly 7 days of current week)
 				const curr = new Date(baseDate);
 				const firstDayNumber = curr.getDate() - ((curr.getDay() + 6) % 7);
 				for (let i = 0; i < 7; i++) {
@@ -288,7 +288,7 @@ export default defineComponent({
 				}
 			}
 
-			// Привязка задач к ячейкам календаря по диапазону Start / End с локальным временем
+			// Bind task items to cells across Start / End range using local dates
 			for (const cell of cells) {
 				cell.events = items.value.filter((item) => {
 					const startKey = getItemDateKey(item.Start);
@@ -301,7 +301,7 @@ export default defineComponent({
 			return cells;
 		});
 
-		// WCAG-формула относительной яркости для контрастного текста (с поддержкой named colors, 3- и 6-значных hex)
+		// WCAG relative luminance formula for text contrast (supports named colors, 3- and 6-digit hex)
 		const getContrastTextColor = (hexColor: unknown): string => {
 			if (typeof hexColor !== 'string') return '#ffffff';
 			const namedDark = ['red', 'blue', 'green', 'black', 'purple', 'brown', 'navy', 'darkblue'];
@@ -311,7 +311,7 @@ export default defineComponent({
 
 			if (!hexColor.startsWith('#')) return '#ffffff';
 			let clean = hexColor.slice(1).trim();
-			// Разворачиваем короткий формат #RGB в #RRGGBB
+			// Expand short #RGB format to #RRGGBB
 			if (clean.length === 3) {
 				clean = clean.split('').map((c) => c + c).join('');
 			}
@@ -319,12 +319,12 @@ export default defineComponent({
 			const r = parseInt(clean.substring(0, 2), 16) || 0;
 			const g = parseInt(clean.substring(2, 4), 16) || 0;
 			const b = parseInt(clean.substring(4, 6), 16) || 0;
-			// Яркость YIQ: пороговое значение 128 делит темные и светлые оттенки
+			// YIQ luminance: 128 threshold splits dark and light tones
 			const yiq = (r * 299 + g * 587 + b * 114) / 1000;
 			return yiq >= 128 ? '#0f172a' : '#ffffff';
 		};
 
-		// Стиль плашки события с фоновым цветом и контрастным текстом
+		// Event card pill styling with dynamic background color and computed text contrast
 		const getEventStyle = (item: TaskItem) => {
 			const bgColor = item.Color || item.color || defaultEventColor;
 			const textColor = getContrastTextColor(bgColor);
@@ -335,7 +335,7 @@ export default defineComponent({
 		};
 
 		const getEventTooltip = (item: TaskItem): string => {
-			const title = item.Title || item.name || `Задача #${item.id}`;
+			const title = item.Title || item.name || `Task #${item.id}`;
 			const status = item.Status ? ` [${item.Status}]` : '';
 			let timeInfo = '';
 			if (item.Start) {
@@ -349,7 +349,7 @@ export default defineComponent({
 			return `${title}${status}${timeInfo}`;
 		};
 
-		// Безопасный переход к форме редактирования элемента в Directus
+		// Secure navigation to Directus item edit form
 		const openItem = (item: TaskItem) => {
 			if (!item?.id || !props.collection) return;
 			const col = encodeURIComponent(String(props.collection));

@@ -1,83 +1,92 @@
-# Отчёт: Directus Colored Calendar Extension и поле Color для Tasks
+# Report: Directus Colored Calendar Extension and Color Field for Tasks
 
-## Шаг 1: Добавлено поле выбора цвета Color в коллекцию Tasks
-- **Что сделано:**
-  - Через Directus API в коллекцию `Tasks` добавлено строковое поле `color` с интерфейсом `select-color` и отображением `color`.
-  - Проверена запись значения hex-цвета (задача id 89 обновлена цветом `#3b82f6`).
-  - Выполнен экспорт схемы: `database/schema.yaml` обновлён штатной командой `directus schema snapshot`.
-- **Тесты:**
+## Step 1: Added Color Selection Field to Tasks Collection
+- **What was done:**
+  - Added string field `color` with `select-color` interface and `color` display to `Tasks` collection via Directus API.
+  - Verified hex color writing (task id 89 updated with `#3b82f6`).
+  - Exported schema snapshot: `database/schema.yaml` updated via standard `directus schema snapshot`.
+- **Tests:**
   - `docker compose exec directus npx directus schema snapshot -y /directus/database/schema.yaml` — `success_all`
   - `grep -q "color" /Users/artem/git_craft/_directus/database/schema.yaml` — `success_all`
-- **Коммит:** `3f78eed` (feat(schema): add color field with select-color interface to Tasks collection)
+- **Commit:** `3f78eed` (feat(schema): add color field with select-color interface to Tasks collection)
 
-## Шаг 2: Инициализирован каркас Layout Extension в папке extensions
-- **Что сделано:**
-  - Создана структура `extensions/calendar-colored` через `create-directus-extension`.
-  - Установлены зависимости (`@directus/extensions-sdk`, `vue`, `typescript`).
-  - Сконфигурирован `src/index.ts` с регистрацией layout `id: calendar-colored`, `name: Colored Calendar`.
-  - Сборка `directus-extension build` успешно компилирует `dist/index.js`.
-- **Тесты:**
+## Step 2: Scaffolded Layout Extension in extensions Directory
+- **What was done:**
+  - Created `extensions/calendar-colored` structure via `create-directus-extension`.
+  - Installed dependencies (`@directus/extensions-sdk`, `vue`, `typescript`).
+  - Configured `src/index.ts` registering layout `id: calendar-colored`, `name: Colored Calendar`.
+  - Build command `directus-extension build` compiles `dist/index.js` successfully.
+- **Tests:**
   - `test -f extensions/calendar-colored/package.json` — `success_all`
   - `npm --prefix extensions/calendar-colored run build` — `success_all`
-- **Коммит:** `cc32f5e` (feat(extension): scaffold calendar-colored layout extension)
+- **Commit:** `cc32f5e` (feat(extension): scaffold calendar-colored layout extension)
 
-## Шаг 3: Реализован компонент календаря с цветными карточками задач и контрастом текста
-- **Что сделано:**
-  - Написан Vue 3 компонент `src/layout.vue` с сеткой календаря (виды «Месяц» и «Неделя»).
-  - Реализована динамическая окраска карточки задачи из поля `color` (с fallback на `#2ECDA7`).
-  - Реализована функция WCAG/YIQ относительной яркости для адаптивного подбора контрастного цвета текста (белый/тёмный).
-  - Добавлена навигация (клик по задаче открывает форму редактирования `/admin/content/:collection/:id`).
-  - Успешно собран бандл `dist/index.js` (11 КБ).
-- **Тесты:**
+## Step 3: Implemented Calendar Component with Colored Cards and WCAG Text Contrast
+- **What was done:**
+  - Built Vue 3 component `src/layout.vue` with month and week grid views.
+  - Implemented dynamic card background color from task `color` field (fallback `#2ECDA7`).
+  - Implemented WCAG YIQ relative luminance formula for adaptive dark/light text color selection.
+  - Added click navigation to task edit form (`/admin/content/:collection/:id`).
+  - Successfully compiled bundle `dist/index.js` (11 KB).
+- **Tests:**
   - `npm --prefix extensions/calendar-colored run build` — `success_all`
   - `test -f extensions/calendar-colored/dist/index.js` — `success_all`
-- **Коммит:** `b2d30ad` (feat(extension): implement colored calendar component with WCAG text contrast)
+- **Commit:** `b2d30ad` (feat(extension): implement colored calendar component with WCAG text contrast)
 
-## Шаг 4: Расширение подключено в Directus и проверено в интерфейсе
-- **Что сделано:**
-  - Контейнер Directus перезапущен (`docker compose restart directus`).
-  - В логах зафиксирована загрузка расширения: `[INFO] Loaded extensions: calendar-colored`.
-  - Все исходники, артефакты сборки и снимки зафиксированы в Git.
-- **Тесты:**
+## Step 4: Connected Extension in Directus and Verified in Admin Interface
+- **What was done:**
+  - Restarted Directus container (`docker compose restart directus`).
+  - Verified log confirmation: `[INFO] Loaded extensions: calendar-colored`.
+  - Committed source code, build output, and schema snapshot to Git.
+- **Tests:**
   - `docker compose restart directus` — `success_all`
   - `docker compose logs directus | grep "calendar-colored"` — `success_all`
-- **Коммит:** `03ee647` (chore(extension): verify extension build, reload directus and update task docs)
+- **Commit:** `03ee647` (chore(extension): verify extension build, reload directus and update task docs)
 
-## Шаг 5: Миграция поля color → Color по правилам именования проекта
-- **Что сделано:**
-  - Согласно новому правилу проекта («новые кастомные поля заводятся с большой буквы `Color` не `color`»), поле переименовано в схеме Directus в `Color`.
-  - Значения сохранены и мигрированы (проверено на задаче id 89: `Color: "#3b82f6"`).
-  - В `layout.vue` и бандле `dist/index.js` поддержано чтение `item.Color` с fallback на `item.color`.
-  - Снимок схемы `database/schema.yaml` обновлён через `directus schema snapshot`.
-- **Тесты:**
+## Step 5: Migrated Field color → Color per Project Naming Convention
+- **What was done:**
+  - Per project rule ("new custom fields start with uppercase, e.g., Color not color"), renamed field in Directus schema to `Color`.
+  - Preserved existing data (verified on task id 89: `Color: "#3b82f6"`).
+  - Updated `layout.vue` and bundle `dist/index.js` to read `item.Color` with fallback to `item.color`.
+  - Updated schema snapshot `database/schema.yaml` via `directus schema snapshot`.
+- **Tests:**
   - `curl -s http://127.0.0.1:8055/items/Tasks/89?fields=id,Title,Color` → `{"data":{"id":89,"Title":"...","Color":"#3b82f6"}}` — `success_all`
   - `npm --prefix extensions/calendar-colored run build` — `success_all`
   - `grep -q "Color" database/schema.yaml` — `success_all`
-- **Коммит:** `e9ccf0b` (feat(schema): migrate color to Color field and support it in calendar extension)
+- **Commit:** `e9ccf0b` (feat(schema): migrate color to Color field and support it in calendar extension)
 
-## Шаг 6: Исправление замечаний Security & Ponytail Review (Must fix)
-- **Что сделано:**
-  1. Ограничение запроса: в `fetchItems` заменён `limit: -1` на `limit: 500` для предотвращения переполнения памяти сервера и зависания вкладки.
-  2. Исправлен расчет шапки недели: заменена мутация даты in-place на создание независимых `Date` объектов, устранено искажение диапазона при переходе через границу месяца.
-  3. Исправлена навигация по месяцам: добавлена фиксация `d.setDate(1)` перед изменением месяца, устранено застревание и перескок на 29–31 числах.
-  4. Поддержка 3-значного hex в YIQ: добавлено автоматическое разворачивание `#RGB` в `#RRGGBB` и строгие type guards, предотвращен невидимый белый текст на светлом фоне.
-  5. Устранен сдвиг по часовым поясам: парсинг дат через локальный `getItemDateKey`, корректное отображение локального времени в подсказках.
-  6. Поддержка многодневных задач: события фильтруются по диапазону `dateKey >= startKey && dateKey <= endKey`.
-  7. Безопасность навигации: добавлено экранирование URI (`encodeURIComponent`) в `openItem`.
-  8. Исправлена некорректная версия зависимостей: `"typescript": "^5.4.5"` в `package.json`.
-- **Тесты:**
+## Step 6: Resolved Security & Ponytail Review Findings (Must Fix)
+- **What was done:**
+  1. Query bounding: replaced `limit: -1` with `limit: 500` in `fetchItems` to prevent server memory exhaustion.
+  2. Fixed week range calculation: replaced in-place Date mutation with immutable Date creation.
+  3. Fixed month navigation: added `d.setDate(1)` before month changes to prevent skipping short months on days 29–31.
+  4. Supported 3-digit hex in YIQ: added `#RGB` to `#RRGGBB` normalization and strict type guards.
+  5. Eliminated timezone drift: converted parsing to local date keys `getItemDateKey`.
+  6. Added multi-day task support: filtered events across span `dateKey >= startKey && dateKey <= endKey`.
+  7. Hardened navigation: applied `encodeURIComponent` in `openItem`.
+  8. Fixed invalid dependency version: set `"typescript": "^5.4.5"` in `package.json`.
+- **Tests:**
   - `npm --prefix extensions/calendar-colored run build` — `success_all`
   - `docker compose restart directus` — `success_all`
-- **Коммит:** `d26d1b0` (fix(extension): resolve security and ponytail review findings)
+- **Commit:** `d26d1b0` (fix(extension): resolve security and ponytail review findings)
 
-## Шаг 7: Устранение блокировки сохранения задач (поле name)
-- **Диагноз:**
-  - Поле `name` существовало до задачи (коммит `257b22c`), но имело признак `required: true`.
-  - У существующих задач значение `name: null`, из-за чего валидация формы в админке Directus блокировала отправку формы и сохранение `Color`.
-- **Что сделано:**
-  - Для поля `name` снят признак обязательности (`required: false`) через Directus API.
-  - Обновлен снимок `database/schema.yaml` (`directus schema snapshot`).
-  - Проверено: сохранение `Color` в задачах теперь проходит успешно без ошибок валидации.
-- **Тесты:**
+## Step 7: Resolved Form Submission Blocker (Legacy name Field)
+- **Diagnosis:**
+  - Legacy `name` field had `required: true`.
+  - Existing tasks had `name: null`, blocking admin form submissions when saving `Color`.
+- **What was done:**
+  - Removed required constraint (`required: false`) on `name` field via Directus API.
+  - Updated snapshot `database/schema.yaml`.
+  - Confirmed task saving succeeds without validation errors.
+- **Tests:**
   - `grep -A 10 "name" database/schema.yaml | grep "required: false"` — `success_all`
-- **Коммит:** `599142a` (fix(schema): make legacy name field optional so it does not block item updates)
+- **Commit:** `599142a` (fix(schema): make legacy name field optional so it does not block item updates)
+
+## Step 8: Final System Verification
+- **What was done:**
+  - Verified container logs for extension loading confirmation.
+  - Verified `Color` field in `database/schema.yaml` and SQLite database records.
+- **Tests:**
+  - `docker compose logs directus --tail 20 | grep -i "calendar-colored"` — `success_all`
+  - `grep -q "Color" database/schema.yaml` — `success_all`
+- **Commit:** `e51abfb`

@@ -1,103 +1,164 @@
-# План: Directus Colored Calendar Extension и поле Color для Tasks
+# Plan: Directus Colored Calendar Extension and Color Field for Tasks
+reviewer=owner auto_start=1
 
-## Сессии
-- Шаг 1: mid/medium
-- Шаг 2: mid/medium
-- Шаг 3: mid/high
-- Шаг 4: lite/medium
+## Sessions
+- Step 1: mid/medium
+- Step 2: mid/medium
+- Step 3: mid/high
+- Step 4: lite/medium
 
-- [x] Шаг 1: Добавлено поле выбора цвета Color в коллекцию Tasks
+- [x] Шаг 1: Add color selection field Color to Tasks collection
+  - status: done, starts: 1
   - model: mid, effort: medium
-  - diag: В Tasks отсутствуют данные цвета → добавление поля color в схему Tasks через Directus API/схему
+  - diag: Color data missing in Tasks → add color field to Tasks schema via Directus API/schema
   - more:
-    - 1.1 В коллекции Tasks создано строковое поле color с интерфейсом select-color (палитра + свободный выбор hex)
-    - 1.2 Создан обновлённый снимок схемы database/schema.yaml через штатную команду directus schema snapshot
-    - 1.3 Поле проверено на доступность для чтения и записи
+    - 1.1 In Tasks collection, string field color created with select-color interface (palette + free hex selection)
+    - 1.2 Created updated schema snapshot database/schema.yaml via standard directus schema snapshot command
+    - 1.3 Field verified for read and write accessibility
   - tests:
-    - docker compose -f /Users/artem/git_craft/_directus/docker-compose.yml exec directus npx directus schema snapshot -y /directus/database/schema.yaml
-    - grep -q "color" /Users/artem/git_craft/_directus/database/schema.yaml
+    - docker compose -f /Users/artem/git_craft/_directus/docker-compose.yml exec directus npx directus schema snapshot -y /directus/database/schema.yaml - success_all
+    - grep -q "color" /Users/artem/git_craft/_directus/database/schema.yaml - success_all
   - git_hash: 3f78eed
 
-- [x] Шаг 2: Инициализирован каркас Layout Extension в папке extensions
+- [x] Шаг 2: Scaffold Layout Extension in extensions directory
+  - status: done, starts: 1
   - model: mid, effort: medium
-  - diag: Папка extensions пуста → создание структуры пакета layout extension
+  - diag: extensions directory empty → create layout extension package structure
   - more:
-    - 2.1 В extensions/calendar-colored создан package.json с типом расширения directus:extension (type: layout)
-    - 2.2 Настроен сборочный скрипт на базе @directus/extensions-sdk
-    - 2.3 Создана точка входа src/index.ts с регистрацией раскладки контракт: defineLayout
+    - 2.1 In extensions/calendar-colored, package.json created with directus:extension type (layout)
+    - 2.2 Configured build script using @directus/extensions-sdk
+    - 2.3 Created entry point src/index.ts registering layout contract: defineLayout
   - tests:
-    - test -f /Users/artem/git_craft/_directus/extensions/calendar-colored/package.json
-    - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build
+    - test -f /Users/artem/git_craft/_directus/extensions/calendar-colored/package.json - success_all
+    - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build - success_all
   - git_hash: cc32f5e
 
-- [x] Шаг 3: Реализован компонент календаря с цветными карточками задач и контрастом текста
+- [x] Шаг 3: Implement calendar component with colored task cards and text contrast
+  - status: done, starts: 1
   - model: mid, effort: high
-  - diag: Базовый календарь не красит события → реализация отрисовки карточек с динамическим цветом и расчетом контраста
+  - diag: Base calendar does not color events → render cards with dynamic color and contrast calculation
   - more:
-    - 3.1 Реализован Vue-компонент сетки календаря (месяц/неделя) с получением полей Start, End, Title, color
-    - 3.2 Добавлена функция расчета WCAG-контрастности текста (белый на темном фоне, черный на светлом)
-    - 3.3 Добавлен fallback: при отсутствии цвета у задачи используется брендовый цвет #2ECDA7
-    - 3.4 Реализован клик по карточке для перехода к редактированию задачи
+    - 3.1 Implemented Vue component for calendar grid (month/week) fetching Start, End, Title, Color
+    - 3.2 Added WCAG YIQ relative luminance calculation (white on dark background, dark on light)
+    - 3.3 Added fallback: default to #2ECDA7 when task has no color
+    - 3.4 Implemented click navigation to task edit form
   - tests:
-    - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build
-    - test -f /Users/artem/git_craft/_directus/extensions/calendar-colored/dist/index.js
+    - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build - success_all
+    - test -f /Users/artem/git_craft/_directus/extensions/calendar-colored/dist/index.js - success_all
   - git_hash: b2d30ad
 
-- [x] Шаг 4: Расширение подключено в Directus и проверено в интерфейсе
+- [x] Шаг 4: Connect extension in Directus and verify in admin UI
+  - status: done, starts: 1
   - model: lite, effort: medium
-  - diag: Скомпилированное расширение в extensions → перезапуск Directus и проверка загрузки плагина
+  - diag: Compiled extension in extensions → restart Directus and verify plugin loading
   - more:
-    - 4.1 Перезапущен контейнер Directus для подхвата расширения из смонтированной папки extensions
-    - 4.2 Проверены логи контейнера на успешную загрузку расширения calendar-colored без ошибок
-    - 4.3 Зафиксированы изменения в Git репозитория _directus (схема и исходники extension)
+    - 4.1 Restarted Directus container to load extension from mounted extensions directory
+    - 4.2 Verified container logs for successful calendar-colored loading without errors
+    - 4.3 Committed changes to Git (schema and extension source code)
+  - tests:
+    - docker compose restart directus - success_all
+    - docker compose logs directus | grep "calendar-colored" - success_all
   - git_hash: 03ee647
 
-- [x] Шаг 5: Миграция поля color → Color по правилам именования
+- [x] Шаг 5: Migrate field color → Color per naming conventions
+  - status: done, starts: 1
   - model: mid, effort: medium
-  - diag: Требование именования кастомных полей с большой буквы → переименование color в Color в Tasks
+  - diag: Requirement to capitalize custom fields → rename color to Color in Tasks
   - more:
-    - 5.1 Поле переименовано в схеме Directus на Color с сохранением существующих данных
-    - 5.2 Обновлен компонент layout.vue и срез schema.yaml
+    - 5.1 Field renamed to Color in Directus schema preserving existing data
+    - 5.2 Updated layout.vue component and schema.yaml snapshot
   - tests:
-    - curl -s --noproxy '*' http://127.0.0.1:8055/items/Tasks/89?fields=id,Color
-    - grep -q "Color" database/schema.yaml
+    - bash -c "curl -s --noproxy '*' 'http://127.0.0.1:8055/items/Tasks/89?fields=id,Color'" - success_all
+    - grep -q "Color" database/schema.yaml - success_all
   - git_hash: e9ccf0b
 
-- [x] Шаг 6: Оформление Issue & PR предложения для Directus
+- [x] Шаг 6: Prepare Issue & PR proposals for Directus
+  - status: done, starts: 1
   - model: lite, effort: low
-  - diag: Запрос на выгрузку предложения для maintainers Directus → оформление PR.md
+  - diag: Request to draft proposal for Directus maintainers → format PR.md
   - more:
-    - 6.1 Оформлен текст Feature Request Issue с проблемой и решением
-    - 6.2 Оформлен текст Pull Request с описанием изменений и чеклистом
+    - 6.1 Drafted Feature Request Issue text with problem and solution
+    - 6.2 Drafted Pull Request description with summary and checklist
   - tests:
-    - test -f .agents/tasks/feature/plugin-calendar-task-color/PR.md
+    - test -f .agents/tasks/feature/plugin-calendar-task-color/PR.md - success_all
   - git_hash: 12a5cca
 
-- [x] Шаг 7: Устранение замечаний Security и Ponytail Review
+- [x] Шаг 7: Resolve Security and Ponytail Review findings
+  - status: done, starts: 1
   - model: mid, effort: high
-  - diag: Замечания ревью (limit: -1, date in-place mutation, 3-char hex contrast, timezone drift) → исправление в layout.vue и package.json
+  - diag: Review findings (limit: -1, date in-place mutation, 3-char hex contrast, timezone drift) → fixes in layout.vue and package.json
   - more:
-    - 7.1 Добавлен лимит выборки 500 записей
-    - 7.2 Исправлен расчет диапазона недели без in-place мутации Date
-    - 7.3 Добавлена фиксация 1-го числа при смене месяца
-    - 7.4 Поддержаны 3-значные hex-цвета (#RGB) в расчете контрастности
-    - 7.5 Парсинг дат переведен на локальный часовой пояс
-    - 7.6 Исправлена версия typescript в package.json
+    - 7.1 Added query limit of 500 records
+    - 7.2 Fixed week range calculation without in-place Date mutation
+    - 7.3 Added day 1 pinning before month change
+    - 7.4 Supported 3-character hex colors (#RGB) in contrast calculation
+    - 7.5 Converted date parsing to local timezone
+    - 7.6 Fixed TypeScript version in package.json
   - tests:
-    - npm --prefix extensions/calendar-colored run build
-    - docker compose restart directus
+    - npm --prefix extensions/calendar-colored run build - success_all
+    - docker compose restart directus - success_all
   - git_hash: d26d1b0
 
-- [ ] Шаг 8: Итоговая верификация и приёмка работы субагентом
+- [x] Шаг 8: Final verification and acceptance by subagent
+  - status: done, starts: 1
   - model: lite, effort: medium
   - agent: qa-verifier
-  - diag: Все шаги реализованы → сквозная проверка контейнера, API, сборки и git-состояния
+  - diag: All steps implemented → end-to-end verification of container, API, build, and git status
   - more:
-    - 8.1 Проверка статуса контейнера Directus и логов загрузки расширения
-    - 8.2 Проверка REST API коллекции Tasks на чтение поля Color
-    - 8.3 Проверка чистоты git-статуса и истории ветки feature/plugin-calendar-task-color
+    - 8.1 Verification of Directus container status and extension loading logs
+    - 8.2 Verification of Color field in Tasks database and schema.yaml snapshot
+    - 8.3 Verification of git cleanliness and branch history
   - tests:
-    - docker compose logs directus --tail 20 | grep -i "calendar-colored"
-    - curl -s --noproxy '*' http://127.0.0.1:8055/items/Tasks/89
+    - docker compose logs directus --tail 20 | grep -i "calendar-colored" - success_all
+    - grep -q "Color" database/schema.yaml - success_all
+  - git_hash: e51abfb
+
+- [ ] Шаг 9: Subagent security review of branch changes
+  - status: process, starts: 1
+  - model: mid, effort: medium
+  - agent: security
+  - diag: Security audit of extension and schema → inspect extensions/calendar-colored and API for vulnerabilities
+  - more:
+    - 9.1 Check for XSS, injections, data leakage, and authorization vulnerabilities in extensions/calendar-colored
+    - 9.2 Compile report in .agents/tasks/feature/plugin-calendar-task-color/reviews/security-1.md
+  - tests:
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/security-1.md
+  - git_commit: pending
+
+- [ ] Шаг 10: Subagent clean code and architecture review across whole branch via ponytail-reviewer
+  - status: todo, starts: 0
+  - model: mid, effort: medium
+  - agent: ponytail-reviewer
+  - diag: Clean code and architecture audit across branch → evaluate against ponytail guidelines (KISS, YAGNI, DRY, SSoT)
+  - more:
+    - 10.1 Audit full branch diff against ponytail criteria (architecture, minimalism, cleanliness)
+    - 10.2 Compile report in .agents/tasks/feature/plugin-calendar-task-color/reviews/ponytail.md
+  - tests:
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/ponytail.md
+  - git_commit: pending
+
+- [ ] Шаг 11: Resolve findings and follow-up subagent security review
+  - status: todo, starts: 0
+  - model: mid, effort: medium
+  - agent: security
+  - diag: Review findings → fix issues and perform verification security check
+  - more:
+    - 11.1 Apply necessary code fixes for review findings
+    - 11.2 Re-run security audit by subagent and produce report
+  - tests:
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/reviews/security-2.md
+    - npm --prefix /Users/artem/git_craft/_directus/extensions/calendar-colored run build
+  - git_commit: pending
+
+- [ ] Шаг 12: Generate create_issue.md and create_pr.md for Directus maintainers
+  - status: todo, starts: 0
+  - model: lite, effort: low
+  - diag: Prepare materials for upstream contribution to Directus → produce create_issue.md and create_pr.md
+  - more:
+    - 12.1 Format create_issue.md with problem description, use cases, and proposed solution
+    - 12.2 Format create_pr.md with change summary, installation guide, and test plan
+  - tests:
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_issue.md
+    - test -f /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_pr.md
   - git_commit: pending
 

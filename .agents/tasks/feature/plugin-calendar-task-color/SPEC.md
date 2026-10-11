@@ -1,5 +1,17 @@
-Можем попробовать сделать extension/plugin чтобы можно было в календаре выводить цвет задачи, который нужно добавить в данные Tasks, то есть нужно добавить  в данные Tasks Поле  Color с выбором цвета. чтобы этот цвет задачи применялся в календаре
+# Task
 
-* Нужно оформить Issue & PR для этого плагина, чтобы можно было предложить в maintainers of Directus at github!
-* Необходимо сделать subagent security review
-* Затем сделать subagent clean code/arch review by ponytail-reviewer at whole branch
+Implement a custom Directus extension/layout plugin that displays colored task cards in calendar views based on a new `Color` field added to the `Tasks` collection schema.
+
+* Language requirement: English only for all files in this branch, including owner markdown files.
+
+# Do After Task Realize
+
+* Run subagent security review.
+* Run subagent clean code and architecture review by ponytail-reviewer across the whole branch.
+* Re-run subagent security review to verify fixes.
+* Prepare `create_issue.md` and `create_pr.md` for this plugin to submit to the maintainers of `https://github.com/directus/directus`.
+* Then create README.md to module/component code with how to use this.
+
+# Bugs
+
+* None currently identified.
