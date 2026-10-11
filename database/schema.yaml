@@ -485,7 +485,7 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 8
+      sort: 11
       special: null
       translations: null
       validation: null
@@ -509,14 +509,14 @@ fields:
       foreign_key_table: null
       foreign_key_column: null
   - collection: Tasks
-    field: color
+    field: Color
     type: string
     meta:
       collection: Tasks
       conditions: null
       display: color
       display_options: null
-      field: color
+      field: Color
       group: null
       hidden: false
       interface: select-color
@@ -525,14 +525,14 @@ fields:
       readonly: false
       required: false
       searchable: true
-      sort: 11
+      sort: 12
       special: null
       translations: null
       validation: null
       validation_message: null
       width: half
     schema:
-      name: color
+      name: Color
       table: Tasks
       data_type: varchar
       default_value: null

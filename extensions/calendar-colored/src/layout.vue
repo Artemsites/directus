@@ -89,6 +89,7 @@ interface TaskItem {
 	name?: string;
 	Start?: string | null;
 	End?: string | null;
+	Color?: string | null;
 	color?: string | null;
 	Status?: string | null;
 	[key: string]: any;
@@ -146,7 +147,7 @@ export default defineComponent({
 				const response = await api.get(`/items/${props.collection}`, {
 					params: {
 						limit: -1,
-						fields: ['id', 'Title', 'name', 'Start', 'End', 'color', 'Status'],
+						fields: ['id', 'Title', 'name', 'Start', 'End', 'Color', 'color', 'Status'],
 					},
 				});
 				items.value = response.data?.data || [];
@@ -303,7 +304,7 @@ export default defineComponent({
 
 		// Стиль плашки события с фоновым цветом и контрастным текстом
 		const getEventStyle = (item: TaskItem) => {
-			const bgColor = item.color || defaultEventColor;
+			const bgColor = item.Color || item.color || defaultEventColor;
 			const textColor = getContrastTextColor(bgColor);
 			return {
 				backgroundColor: bgColor,

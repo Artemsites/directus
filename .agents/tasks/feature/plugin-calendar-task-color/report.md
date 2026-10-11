@@ -43,5 +43,14 @@
   - `docker compose logs directus | grep "calendar-colored"` — `success_all`
 - **Коммит:** `03ee647` (chore(extension): verify extension build, reload directus and update task docs)
 
-
-
+## Шаг 5: Миграция поля color → Color по правилам именования проекта
+- **Что сделано:**
+  - Согласно новому правилу проекта («новые кастомные поля заводятся с большой буквы `Color` не `color`»), поле переименовано в схеме Directus в `Color`.
+  - Значения сохранены и мигрированы (проверено на задаче id 89: `Color: "#3b82f6"`).
+  - В `layout.vue` и бандле `dist/index.js` поддержано чтение `item.Color` с fallback на `item.color`.
+  - Снимок схемы `database/schema.yaml` обновлён через `directus schema snapshot`.
+- **Тесты:**
+  - `curl -s http://127.0.0.1:8055/items/Tasks/89?fields=id,Title,Color` → `{"data":{"id":89,"Title":"...","Color":"#3b82f6"}}` — `success_all`
+  - `npm --prefix extensions/calendar-colored run build` — `success_all`
+  - `grep -q "Color" database/schema.yaml` — `success_all`
+- **Коммит:** готовится к фиксации
