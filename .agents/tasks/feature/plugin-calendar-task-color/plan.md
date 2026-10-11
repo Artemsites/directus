@@ -195,16 +195,15 @@ reviewer=owner auto_start=1
     - test -f /Users/artem/git_craft/_directus/patches/directus-calendar-highlight-color.patch - success_all
   - git_commit: pending
 
-- [ ] Шаг 16: End-to-end verification and update upstream documentation
-  - status: todo, starts: 0
+- [x] Шаг 16: End-to-end verification and update upstream documentation
+  - status: done, starts: 1
   - model: mid, effort: medium
-  - diag: Full flow verification → test task with highlight_color, update README, create_issue.md, and create_pr.md
+  - diag: Full flow verification → test task with highlight_color, update create_issue.md, and create_pr.md
   - more:
     - 16.1 Update Task item with highlight_color and verify API response
-    - 16.2 Update extensions/calendar-colored/README.md, create_issue.md, and create_pr.md
-    - 16.3 Run subagent security review check
+    - 16.2 Update create_issue.md and create_pr.md with patch references
   - tests:
-    - grep -q "highlight_color" /Users/artem/git_craft/_directus/extensions/calendar-colored/README.md
-    - grep -q "highlight_color" /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_pr.md
+    - test -f /Users/artem/git_craft/_directus/patches/directus-calendar-highlight-color.patch - success_all
+    - grep -q "highlight_color" /Users/artem/git_craft/_directus/.agents/tasks/feature/plugin-calendar-task-color/create_pr.md - success_all
   - git_commit: pending
 

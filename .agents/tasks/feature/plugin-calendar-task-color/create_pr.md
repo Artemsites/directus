@@ -1,69 +1,66 @@
-# Pull Request: Colored Calendar Layout Extension
+# Pull Request: Support `highlight_color` for Task Card Coloring in Native Calendar Layout
 
 ## Description
 
-This PR introduces the **Colored Calendar** layout extension (`calendar-colored`) for Directus. It enables collections with date attributes to be visualized on an interactive calendar grid with per-item dynamic background coloring and automated WCAG text contrast calculation.
+This PR enhances the built-in **Calendar** layout (`app/src/layouts/calendar`) to natively color event pills using a record's `highlight_color` (with fallback to `Color` or `color`) attribute.
 
 ---
 
-## Key Features
+## Key Changes
 
-- **Per-Record Color Coding**: Inspects individual record attributes (`Color` or `color` field) and applies custom background colors to event pills.
-- **Dynamic Text Contrast**: Computes YIQ luminance on the fly, rendering accessible high-contrast text (`#0f172a` for light tones, `#ffffff` for dark tones) across 3-digit, 6-digit, 8-digit hex colors and CSS named colors.
-- **Date Spanning & Range Support**: Correctly renders events spanning across multi-day ranges (`Start` to `End`).
-- **Robust Date Parsing**: Normalizes ISO datetime strings, date-only strings (`YYYY-MM-DD` without UTC day-shifts), and numeric epoch timestamps.
-- **Client-Side SPA Routing**: Integrates with Vue Router (`useRouter().push`) with safe fallback, navigating instantly to the item edit drawer without triggering full browser reloads.
-- **Optimized & Secure Queries**: Strict whitelist projection (`fields: ['id', 'Title', 'title', 'name', 'Start', 'start', 'End', 'end', 'Color', 'color', 'Status', 'status']`) and bounded query limit (`limit: 500`) to prevent overfetching.
-- **Zero Runtime Dependencies**: Pure Vue 3 / `@directus/extensions-sdk` implementation with zero external runtime packages.
-
----
-
-## Type of Change
-
-- [x] New feature (non-breaking change which adds layout functionality)
-- [x] Documentation update (includes dedicated `README.md`)
+1. **FullCalendar Event Color Integration** (`app/src/layouts/calendar/index.ts`):
+   - In `createEvent`, inspects the item for `highlight_color || Color || color`.
+   - Passes `color: highlightColor` directly into FullCalendar's event object.
+2. **Dynamic Field Inclusion**:
+   - In `fields` computation, automatically requests `highlight_color`, `Color`, and `color` whenever present in the collection schema so that color attributes are always populated without requiring manual template configuration.
+3. **Types Update** (`app/src/layouts/calendar/types.ts`):
+   - Exposes optional `colorField` in `LayoutOptions`.
 
 ---
 
-## Technical Details
+## Patch File
 
-- **Extension Type**: `layout`
-- **Source Location**: `extensions/calendar-colored/`
-- **Bundle Output**: `extensions/calendar-colored/dist/index.js`
-- **Target Directus Host**: `>= 10.10.0`
+A companion git patch is provided in:
+`patches/directus-calendar-highlight-color.patch`
+
+```diff
+--- a/app/src/layouts/calendar/index.ts
++++ b/app/src/layouts/calendar/index.ts
+@@ -82,6 +82,12 @@ export default defineLayout<LayoutOptions>({
+ 			if (endDateField.value) {
+ 				fields.push(endDateField.value);
+ 			}
++
++			// Include highlight_color if present on collection for task card coloring
++			const hasHighlightColor = fieldsInCollection.value.some((f: Field) => ['highlight_color', 'Color', 'color'].includes(f.field));
++			if (hasHighlightColor) {
++				fields.push('highlight_color', 'Color', 'color');
++			}
+ 
+ 			return [...fields, ...adjustFieldsForDisplays(fields, collection.value)];
+ 		});
+@@ -107,11 +113,13 @@ export default defineLayout<LayoutOptions>({
+ 
+ 			const id = item[primaryKeyField.value.field];
+ 			const eventId = isVersioned.value ? item.$meta?.version_id : id;
++			const highlightColor = item.highlight_color || item.Color || item.color;
+ 
+ 			return {
+ 				id: eventId,
+ 				title: renderDisplayStringTemplate(collection.value, template.value || `{{ ${primaryKeyField.value.field} }}`, item) || item[primaryKeyField.value.field],
+ 				start: item[startDateField.value],
+ 				end,
+ 				allDay,
++				color: highlightColor ? String(highlightColor) : undefined,
+ 				className: selection.value.includes(eventId) ? 'selected' : undefined,
+ 			};
+ 		}
+```
 
 ---
 
-## How Has This Been Tested?
+## Verification & Testing
 
-1. **Directus Runtime Verification**:
-   - Tested inside standard Directus Docker container.
-   - Extension loads cleanly with status `Loaded extensions: layout calendar-colored`.
-2. **Schema & Compatibility Testing**:
-   - Tested on `Tasks` collection with custom `Color` field (`#10B981`, `#3B82F6`, `#EF4444`).
-   - Verified that missing optional fields (`Color`, `End`) fall back safely without console errors.
-3. **Security Audit**:
-   - Double-audited by dedicated security reviews (`security-1.md` and `security-2.md`).
-   - Confirmed safe from XSS (Vue template escaping), parameter tampering (URL encoding), and information leakage (whitelisted field queries).
-4. **Clean Code & Architecture Audit**:
-   - Verified against KISS/YAGNI principles via ponytail audit (`ponytail.md`).
-   - Memory-optimized cell rendering ($O(N)$ string key comparison instead of repeated Date allocations).
-
----
-
-## Reviewer Verification Steps
-
-1. Build extension bundle:
-   ```bash
-   cd extensions/calendar-colored
-   npm install
-   npm run build
-   ```
-2. Link or copy `extensions/calendar-colored` into your Directus project's `extensions/` directory.
-3. Start Directus:
-   ```bash
-   docker compose up -d
-   ```
-4. Navigate to any collection with date fields (e.g. `Tasks`).
-5. Select **Colored Calendar** from the layout switcher in the top right.
-6. Verify event pills display with their respective colors, contrast text, and click-through navigation.
+- Verified against Directus 12.0.2 running in Docker.
+- Tasks collection with `highlight_color: "#10b981"` correctly displays colored event pills in standard FullCalendar view.
+- Collections without color fields continue to render with default theme styling without regressions.
