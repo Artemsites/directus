@@ -50,7 +50,54 @@
     - 4.1 Перезапущен контейнер Directus для подхвата расширения из смонтированной папки extensions
     - 4.2 Проверены логи контейнера на успешную загрузку расширения calendar-colored без ошибок
     - 4.3 Зафиксированы изменения в Git репозитория _directus (схема и исходники extension)
-  - tests:
-    - docker compose -f /Users/artem/git_craft/_directus/docker-compose.yml restart directus
-    - docker compose -f /Users/artem/git_craft/_directus/docker-compose.yml logs directus --tail 50 | grep -i "calendar-colored"
   - git_hash: 03ee647
+
+- [x] Шаг 5: Миграция поля color → Color по правилам именования
+  - model: mid, effort: medium
+  - diag: Требование именования кастомных полей с большой буквы → переименование color в Color в Tasks
+  - more:
+    - 5.1 Поле переименовано в схеме Directus на Color с сохранением существующих данных
+    - 5.2 Обновлен компонент layout.vue и срез schema.yaml
+  - tests:
+    - curl -s --noproxy '*' http://127.0.0.1:8055/items/Tasks/89?fields=id,Color
+    - grep -q "Color" database/schema.yaml
+  - git_hash: e9ccf0b
+
+- [x] Шаг 6: Оформление Issue & PR предложения для Directus
+  - model: lite, effort: low
+  - diag: Запрос на выгрузку предложения для maintainers Directus → оформление PR.md
+  - more:
+    - 6.1 Оформлен текст Feature Request Issue с проблемой и решением
+    - 6.2 Оформлен текст Pull Request с описанием изменений и чеклистом
+  - tests:
+    - test -f .agents/tasks/feature/plugin-calendar-task-color/PR.md
+  - git_hash: 12a5cca
+
+- [x] Шаг 7: Устранение замечаний Security и Ponytail Review
+  - model: mid, effort: high
+  - diag: Замечания ревью (limit: -1, date in-place mutation, 3-char hex contrast, timezone drift) → исправление в layout.vue и package.json
+  - more:
+    - 7.1 Добавлен лимит выборки 500 записей
+    - 7.2 Исправлен расчет диапазона недели без in-place мутации Date
+    - 7.3 Добавлена фиксация 1-го числа при смене месяца
+    - 7.4 Поддержаны 3-значные hex-цвета (#RGB) в расчете контрастности
+    - 7.5 Парсинг дат переведен на локальный часовой пояс
+    - 7.6 Исправлена версия typescript в package.json
+  - tests:
+    - npm --prefix extensions/calendar-colored run build
+    - docker compose restart directus
+  - git_hash: d26d1b0
+
+- [ ] Шаг 8: Итоговая верификация и приёмка работы субагентом
+  - model: lite, effort: medium
+  - agent: qa-verifier
+  - diag: Все шаги реализованы → сквозная проверка контейнера, API, сборки и git-состояния
+  - more:
+    - 8.1 Проверка статуса контейнера Directus и логов загрузки расширения
+    - 8.2 Проверка REST API коллекции Tasks на чтение поля Color
+    - 8.3 Проверка чистоты git-статуса и истории ветки feature/plugin-calendar-task-color
+  - tests:
+    - docker compose logs directus --tail 20 | grep -i "calendar-colored"
+    - curl -s --noproxy '*' http://127.0.0.1:8055/items/Tasks/89
+  - git_commit: pending
+

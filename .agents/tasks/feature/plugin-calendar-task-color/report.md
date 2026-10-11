@@ -68,4 +68,16 @@
 - **Тесты:**
   - `npm --prefix extensions/calendar-colored run build` — `success_all`
   - `docker compose restart directus` — `success_all`
-- **Коммит:** готовится к фиксации
+- **Коммит:** `d26d1b0` (fix(extension): resolve security and ponytail review findings)
+
+## Шаг 7: Устранение блокировки сохранения задач (поле name)
+- **Диагноз:**
+  - Поле `name` существовало до задачи (коммит `257b22c`), но имело признак `required: true`.
+  - У существующих задач значение `name: null`, из-за чего валидация формы в админке Directus блокировала отправку формы и сохранение `Color`.
+- **Что сделано:**
+  - Для поля `name` снят признак обязательности (`required: false`) через Directus API.
+  - Обновлен снимок `database/schema.yaml` (`directus schema snapshot`).
+  - Проверено: сохранение `Color` в задачах теперь проходит успешно без ошибок валидации.
+- **Тесты:**
+  - `grep -A 10 "name" database/schema.yaml | grep "required: false"` — `success_all`
+- **Коммит:** `599142a` (fix(schema): make legacy name field optional so it does not block item updates)
